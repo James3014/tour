@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Trip {
+  id          String   @id @default(cuid())
+  template_id String
+  user_id     String
+  title       String
+  days        Day[]
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([user_id])
+  @@index([template_id])
+}
+
+model Day {
+  id         String  @id @default(cuid())
+  trip_id    String
+  trip       Trip    @relation(fields: [trip_id], references: [id], onDelete: Cascade)
+  day_index  Int
+  label      String
+  city       String?
+  is_ski_day Boolean @default(false)
+  items      Item[]
+
+  @@index([trip_id])
+  @@unique([trip_id, day_index])
+}
+
+model Item {
+  id         String   @id @default(cuid())
+  day_id     String
+  day        Day      @relation(fields: [day_id], references: [id], onDelete: Cascade)
+  type       String
+  title      String
+  time_hint  String?
+  location   String?
+  note       String?
+  created_at DateTime @default(now())
+
+  @@index([day_id])
+}
