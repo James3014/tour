@@ -331,6 +331,10 @@ interface PackingItem {
 - ✅ 33 個單元測試（TDD 開發）
 
 ### 🔄 進行中（Phase 3）
+- [ ] **分享功能** ⭐ 優先
+  - Trip read-only 分享頁 `/trips/[id]/share`
+  - 無需登入、只讀模式
+  - 分享連結追蹤（訪問次數統計）
 - [ ] Day 新增/刪除功能
   - 動態新增天數
   - 刪除天數（含確認）
