@@ -16,10 +16,11 @@ import {
 import { getTemplateById } from '@/lib/templates';
 
 /**
- * 生成唯一 ID（簡單版，生產環境用 cuid 或 uuid）
+ * 生成唯一 ID
+ * 使用 Node.js 内置的 crypto.randomUUID()，保证全局唯一性
  */
 function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return crypto.randomUUID();
 }
 
 /**

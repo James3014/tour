@@ -94,9 +94,9 @@ export interface DayData {
 export interface ItemData {
   id: string;
   day_id: string;
-  type: string;
+  type: ItemType;
   title: string;
-  time_hint: string | null;
+  time_hint: TimeHint | null;
   location: string | null;
   note: string | null;
   created_at: Date;
