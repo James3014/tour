@@ -57,6 +57,9 @@ export default function TripDetailPage() {
   const [addingToDayId, setAddingToDayId] = useState<string | null>(null);
   const [addForm, setAddForm] = useState<Partial<ItemData>>({});
 
+  // Share state
+  const [copied, setCopied] = useState(false);
+
   useEffect(() => {
     if (!params.id) return;
 
@@ -235,6 +238,17 @@ export default function TripDetailPage() {
       setPacking(updatedPacking);
     } catch (error) {
       alert('更新失敗，請稍後再試');
+    }
+  };
+
+  const copyShareLink = async () => {
+    const shareUrl = `${window.location.origin}/trips/${params.id}/share`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      alert('複製失敗，請手動複製連結');
     }
   };
 
@@ -810,8 +824,15 @@ export default function TripDetailPage() {
           >
             ← 返回模板選擇
           </a>
-          <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-            分享旅程
+          <button
+            onClick={copyShareLink}
+            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              copied
+                ? 'bg-green-600 text-white'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
+          >
+            {copied ? '✓ 已複製連結' : '🔗 分享旅程'}
           </button>
         </div>
       </div>
