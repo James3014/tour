@@ -1,14 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Template } from '@/lib/types/template';
 
 export default function TemplatesPage() {
-  const router = useRouter();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/templates')
@@ -19,29 +16,6 @@ export default function TemplatesPage() {
       })
       .catch(() => setLoading(false));
   }, []);
-
-  const handleCreateTrip = async (templateId: string) => {
-    setCreating(templateId);
-
-    try {
-      const res = await fetch('/api/trips', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          template_id: templateId,
-          user_id: 'demo_user', // MVP: 固定用戶
-        }),
-      });
-
-      if (!res.ok) throw new Error('創建失敗');
-
-      const trip = await res.json();
-      router.push(`/trips/${trip.id}`);
-    } catch (error) {
-      alert('創建旅程失敗');
-      setCreating(null);
-    }
-  };
 
   if (loading) {
     return (
@@ -111,11 +85,10 @@ export default function TemplatesPage() {
               </div>
 
               <button
-                onClick={() => handleCreateTrip(template.template_id)}
-                disabled={creating === template.template_id}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                onClick={() => (window.location.href = `/templates/${template.template_id}`)}
+                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
               >
-                {creating === template.template_id ? '創建中...' : '使用此模板'}
+                查看詳情 →
               </button>
             </div>
           ))}
