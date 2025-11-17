@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { TripWithDetails, ChecklistItem, PackingItem } from '@/lib/types/template';
+import { TripWithDetails, ChecklistItem, PackingItem, ItemData, ItemType, TimeHint } from '@/lib/types/template';
 
 const TIME_HINT_LABELS: Record<string, string> = {
   morning: '早上',
@@ -46,14 +46,16 @@ export default function TripDetailPage() {
   const [packing, setPacking] = useState<PackingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('itinerary');
-
-  // Track which days are expanded (key: day.id, value: boolean)
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({});
+
+  // Item editing state
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<ItemData>>({});
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!params.id) return;
 
-    // Fetch trip data
     Promise.all([
       fetch(`/api/trips/${params.id}`).then((res) => res.json()),
       fetch(`/api/trips/${params.id}/checklist`).then((res) => res.ok ? res.json() : []),
@@ -64,7 +66,6 @@ export default function TripDetailPage() {
         setChecklist(checklistData);
         setPacking(packingData);
 
-        // 預設展開前 2 天
         if (tripData.days.length > 0) {
           const initialExpanded: Record<string, boolean> = {};
           tripData.days.slice(0, 2).forEach((day: any) => {
@@ -92,6 +93,71 @@ export default function TripDetailPage() {
       month: 'long',
       day: 'numeric',
     });
+  };
+
+  const startEditingItem = (item: ItemData) => {
+    setEditingItemId(item.id);
+    setEditForm({
+      type: item.type,
+      title: item.title,
+      date: item.date,
+      time: item.time,
+      time_hint: item.time_hint,
+      location: item.location,
+      link: item.link,
+      note: item.note,
+    });
+  };
+
+  const cancelEditing = () => {
+    setEditingItemId(null);
+    setEditForm({});
+  };
+
+  const saveItem = async () => {
+    if (!editingItemId) return;
+
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/trips/items/${editingItemId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...editForm,
+          date: editForm.date || null,
+          time: editForm.time || null,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update item');
+
+      // Refresh trip data
+      const updatedTrip = await fetch(`/api/trips/${params.id}`).then((res) => res.json());
+      setTrip(updatedTrip);
+      cancelEditing();
+    } catch (error) {
+      alert('儲存失敗，請稍後再試');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const deleteItem = async (itemId: string) => {
+    if (!confirm('確定要刪除此項目嗎？')) return;
+
+    try {
+      const response = await fetch(`/api/trips/items/${itemId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Failed to delete item');
+
+      // Refresh trip data
+      const updatedTrip = await fetch(`/api/trips/${params.id}`).then((res) => res.json());
+      setTrip(updatedTrip);
+    } catch (error) {
+      alert('刪除失敗，請稍後再試');
+    }
   };
 
   if (loading) {
@@ -182,7 +248,7 @@ export default function TripDetailPage() {
 
         {/* Tab Content */}
         {activeTab === 'itinerary' ? (
-          /* Itinerary Tab - Days with Items */
+          /* Itinerary Tab */
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-gray-600">
@@ -213,7 +279,7 @@ export default function TripDetailPage() {
 
             {trip.days.map((day) => (
               <div key={day.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                {/* Day Header - Always Visible */}
+                {/* Day Header */}
                 <button
                   onClick={() => toggleDay(day.id)}
                   className="w-full flex items-center gap-3 p-4 hover:bg-gray-50 transition-colors"
@@ -237,7 +303,7 @@ export default function TripDetailPage() {
                   </span>
                 </button>
 
-                {/* Day Content - Collapsible */}
+                {/* Day Content */}
                 {expandedDays[day.id] && (
                   <div className="border-t border-gray-200 p-4">
                     <div className="space-y-3">
@@ -245,36 +311,187 @@ export default function TripDetailPage() {
                         <p className="text-gray-400 text-center py-4">尚無行程項目</p>
                       ) : (
                         day.items.map((item) => (
-                          <div
-                            key={item.id}
-                            className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                            onClick={() => alert('編輯功能即將實現')}
-                          >
-                            <div className="flex items-start gap-3">
-                              <span className="text-2xl">
-                                {ITEM_TYPE_LABELS[item.type]?.split(' ')[0] || '📌'}
-                              </span>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <h3 className="font-semibold">{item.title}</h3>
-                                  {item.time_hint && (
-                                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                                      {TIME_HINT_LABELS[item.time_hint] || item.time_hint}
-                                    </span>
-                                  )}
+                          <div key={item.id}>
+                            {editingItemId === item.id ? (
+                              /* Edit Mode */
+                              <div className="border border-blue-500 rounded-lg p-4 bg-blue-50">
+                                <h4 className="font-bold mb-3">編輯項目</h4>
+                                <div className="space-y-3">
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        類型
+                                      </label>
+                                      <select
+                                        value={editForm.type || ''}
+                                        onChange={(e) => setEditForm({ ...editForm, type: e.target.value as ItemType })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                      >
+                                        {Object.entries(ITEM_TYPE_LABELS).map(([value, label]) => (
+                                          <option key={value} value={value}>{label}</option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        時段
+                                      </label>
+                                      <select
+                                        value={editForm.time_hint || ''}
+                                        onChange={(e) => setEditForm({ ...editForm, time_hint: (e.target.value || null) as TimeHint | null })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                      >
+                                        <option value="">不指定</option>
+                                        {Object.entries(TIME_HINT_LABELS).map(([value, label]) => (
+                                          <option key={value} value={value}>{label}</option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                      標題 *
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={editForm.title || ''}
+                                      onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                      required
+                                    />
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        具體時間
+                                      </label>
+                                      <input
+                                        type="time"
+                                        value={editForm.time || ''}
+                                        onChange={(e) => setEditForm({ ...editForm, time: e.target.value || null })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        地點
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={editForm.location || ''}
+                                        onChange={(e) => setEditForm({ ...editForm, location: e.target.value || null })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                        placeholder="例如：新千歲機場"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                      相關連結
+                                    </label>
+                                    <input
+                                      type="text"
+                                      value={editForm.link || ''}
+                                      onChange={(e) => setEditForm({ ...editForm, link: e.target.value || null })}
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                      placeholder="例如：訂單連結、Google Maps"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                      備註
+                                    </label>
+                                    <textarea
+                                      value={editForm.note || ''}
+                                      onChange={(e) => setEditForm({ ...editForm, note: e.target.value || null })}
+                                      rows={3}
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                      placeholder="其他需要記錄的資訊"
+                                    />
+                                  </div>
+
+                                  <div className="flex gap-2 justify-end pt-2">
+                                    <button
+                                      onClick={cancelEditing}
+                                      disabled={saving}
+                                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
+                                    >
+                                      取消
+                                    </button>
+                                    <button
+                                      onClick={saveItem}
+                                      disabled={saving || !editForm.title}
+                                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                    >
+                                      {saving ? '儲存中...' : '儲存'}
+                                    </button>
+                                  </div>
                                 </div>
-                                {item.location && (
-                                  <p className="text-sm text-gray-600 mb-1">
-                                    📍 {item.location}
-                                  </p>
-                                )}
-                                {item.note && (
-                                  <p className="text-sm text-gray-500 mt-2 bg-gray-50 p-2 rounded">
-                                    {item.note}
-                                  </p>
-                                )}
                               </div>
-                            </div>
+                            ) : (
+                              /* View Mode */
+                              <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors group">
+                                <div className="flex items-start gap-3">
+                                  <span className="text-2xl">
+                                    {ITEM_TYPE_LABELS[item.type]?.split(' ')[0] || '📌'}
+                                  </span>
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <h3 className="font-semibold">{item.title}</h3>
+                                      {item.time && (
+                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                                          🕐 {item.time}
+                                        </span>
+                                      )}
+                                      {item.time_hint && !item.time && (
+                                        <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                                          {TIME_HINT_LABELS[item.time_hint]}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {item.location && (
+                                      <p className="text-sm text-gray-600 mb-1">
+                                        📍 {item.location}
+                                      </p>
+                                    )}
+                                    {item.link && (
+                                      <a
+                                        href={item.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-sm text-blue-600 hover:underline inline-block mb-1"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        🔗 相關連結
+                                      </a>
+                                    )}
+                                    {item.note && (
+                                      <p className="text-sm text-gray-500 mt-2 bg-gray-50 p-2 rounded">
+                                        {item.note}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                                    <button
+                                      onClick={() => startEditingItem(item)}
+                                      className="text-sm text-blue-600 hover:bg-blue-50 px-2 py-1 rounded"
+                                    >
+                                      編輯
+                                    </button>
+                                    <button
+                                      onClick={() => deleteItem(item.id)}
+                                      className="text-sm text-red-600 hover:bg-red-50 px-2 py-1 rounded"
+                                    >
+                                      刪除
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         ))
                       )}
@@ -289,7 +506,7 @@ export default function TripDetailPage() {
             ))}
           </div>
         ) : (
-          /* Preparation Tab - Checklist & Packing */
+          /* Preparation Tab - Same as before */
           <div className="space-y-6">
             {/* Checklist Section */}
             <div className="bg-white rounded-lg shadow-md p-6">
