@@ -206,6 +206,22 @@ export default function TripDetailPage() {
     }
   };
 
+  const toggleChecklistItemHandler = async (itemId: string) => {
+    try {
+      const response = await fetch(`/api/trips/checklist/${itemId}`, {
+        method: 'PATCH',
+      });
+
+      if (!response.ok) throw new Error('Failed to toggle checklist item');
+
+      // Refresh checklist data
+      const updatedChecklist = await fetch(`/api/trips/${params.id}/checklist`).then((res) => res.json());
+      setChecklist(updatedChecklist);
+    } catch (error) {
+      alert('更新失敗，請稍後再試');
+    }
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen p-8">
@@ -711,7 +727,7 @@ export default function TripDetailPage() {
                           <input
                             type="checkbox"
                             checked={item.completed}
-                            onChange={() => alert('勾選功能即將實現')}
+                            onChange={() => toggleChecklistItemHandler(item.id)}
                             className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                           />
                           <span className={item.completed ? 'line-through text-gray-400' : ''}>

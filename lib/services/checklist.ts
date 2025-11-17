@@ -5,6 +5,7 @@
  * 1. 簡單：從模板複製到 ChecklistItem/PackingItem
  * 2. 清晰：數據流向明確
  * 3. 無特殊情況：統一處理所有 template
+ * 4. 不可變性：切換狀態時返回新物件
  */
 
 import {
@@ -77,4 +78,17 @@ export function createPackingFromTemplate(
     order: itemTemplate.order,
     created_at: new Date(),
   }));
+}
+
+/**
+ * 切換 Checklist 項目的勾選狀態
+ *
+ * @param item - 要切換的 Checklist 項目
+ * @returns 新的 ChecklistItem（completed 狀態已切換）
+ */
+export function toggleChecklistItem(item: ChecklistItem): ChecklistItem {
+  return {
+    ...item,
+    completed: !item.completed,
+  };
 }
