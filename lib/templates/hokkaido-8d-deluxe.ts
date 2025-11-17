@@ -9,8 +9,8 @@ export const HOKKAIDO_8D_DELUXE_TEMPLATE: Template = {
   region: 'Japan / Hokkaido',
   default_days: 8,
   default_ski_days: 5,
-  target_group: '中高階、追求粉雪品質',
-  description: '深度體驗北海道兩大雪場，盡享世界級粉雪',
+  target_group: '中高階、4-8 人團隊',
+  description: '深度體驗二世古 + 富良野兩大雪場，5 天滑雪盡享世界級粉雪',
   day_templates: [
     {
       day_index: 1,
