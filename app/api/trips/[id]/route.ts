@@ -28,7 +28,7 @@ export async function GET(
     // Zod 验证错误
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: '输入验证失败', details: error.errors },
+        { error: '输入验证失败', details: error.issues },
         { status: 400 }
       );
     }
