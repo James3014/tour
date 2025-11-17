@@ -10,7 +10,11 @@
 
 import { PrismaClient } from '@prisma/client';
 import { Database } from './interface';
-import { TripWithDetails } from '@/lib/types/template';
+import {
+  TripWithDetails,
+  ChecklistItem,
+  PackingItem,
+} from '@/lib/types/template';
 
 /**
  * 防止开发模式下创建多个 Prisma 实例
@@ -153,6 +157,40 @@ class PrismaDB implements Database {
     await prisma.trip.delete({
       where: { id },
     });
+  }
+
+  // Checklist operations (TODO: 實現 Prisma schema 後補充)
+  async createChecklistItems(items: ChecklistItem[]): Promise<ChecklistItem[]> {
+    throw new Error('Prisma Checklist operations not yet implemented. Use MemoryDB for now.');
+  }
+
+  async getChecklistByTripId(tripId: string): Promise<ChecklistItem[]> {
+    throw new Error('Prisma Checklist operations not yet implemented. Use MemoryDB for now.');
+  }
+
+  async updateChecklistItem(id: string, item: ChecklistItem): Promise<ChecklistItem> {
+    throw new Error('Prisma Checklist operations not yet implemented. Use MemoryDB for now.');
+  }
+
+  async deleteChecklistItem(id: string): Promise<void> {
+    throw new Error('Prisma Checklist operations not yet implemented. Use MemoryDB for now.');
+  }
+
+  // Packing operations (TODO: 實現 Prisma schema 後補充)
+  async createPackingItems(items: PackingItem[]): Promise<PackingItem[]> {
+    throw new Error('Prisma Packing operations not yet implemented. Use MemoryDB for now.');
+  }
+
+  async getPackingByTripId(tripId: string): Promise<PackingItem[]> {
+    throw new Error('Prisma Packing operations not yet implemented. Use MemoryDB for now.');
+  }
+
+  async updatePackingItem(id: string, item: PackingItem): Promise<PackingItem> {
+    throw new Error('Prisma Packing operations not yet implemented. Use MemoryDB for now.');
+  }
+
+  async deletePackingItem(id: string): Promise<void> {
+    throw new Error('Prisma Packing operations not yet implemented. Use MemoryDB for now.');
   }
 }
 

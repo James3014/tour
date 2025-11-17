@@ -6,12 +6,19 @@
  * 修复：使用 global 变量防止 Next.js 热重载导致的内存泄漏
  */
 
-import { TripWithDetails } from '@/lib/types/template';
+import {
+  TripWithDetails,
+  ChecklistItem,
+  PackingItem,
+} from '@/lib/types/template';
 import { Database } from './interface';
 
 class MemoryDB implements Database {
   private trips: Map<string, TripWithDetails> = new Map();
+  private checklists: Map<string, ChecklistItem> = new Map();
+  private packings: Map<string, PackingItem> = new Map();
 
+  // Trip operations
   async createTrip(trip: TripWithDetails): Promise<TripWithDetails> {
     this.trips.set(trip.id, trip);
     return trip;
@@ -32,6 +39,52 @@ class MemoryDB implements Database {
 
   async deleteTrip(id: string): Promise<void> {
     this.trips.delete(id);
+  }
+
+  // Checklist operations
+  async createChecklistItems(items: ChecklistItem[]): Promise<ChecklistItem[]> {
+    items.forEach((item) => {
+      this.checklists.set(item.id, item);
+    });
+    return items;
+  }
+
+  async getChecklistByTripId(tripId: string): Promise<ChecklistItem[]> {
+    return Array.from(this.checklists.values())
+      .filter((item) => item.trip_id === tripId)
+      .sort((a, b) => a.order - b.order);
+  }
+
+  async updateChecklistItem(id: string, item: ChecklistItem): Promise<ChecklistItem> {
+    this.checklists.set(id, item);
+    return item;
+  }
+
+  async deleteChecklistItem(id: string): Promise<void> {
+    this.checklists.delete(id);
+  }
+
+  // Packing operations
+  async createPackingItems(items: PackingItem[]): Promise<PackingItem[]> {
+    items.forEach((item) => {
+      this.packings.set(item.id, item);
+    });
+    return items;
+  }
+
+  async getPackingByTripId(tripId: string): Promise<PackingItem[]> {
+    return Array.from(this.packings.values())
+      .filter((item) => item.trip_id === tripId)
+      .sort((a, b) => a.order - b.order);
+  }
+
+  async updatePackingItem(id: string, item: PackingItem): Promise<PackingItem> {
+    this.packings.set(id, item);
+    return item;
+  }
+
+  async deletePackingItem(id: string): Promise<void> {
+    this.packings.delete(id);
   }
 }
 

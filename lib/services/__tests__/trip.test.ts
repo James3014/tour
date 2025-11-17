@@ -49,6 +49,37 @@ describe('createTripFromTemplate', () => {
 
       expect(result.title).toBe('我的北海道滑雪之旅');
     });
+
+    it('應該允許自定義出發日期、人數和備註', () => {
+      const startDate = new Date('2025-02-01');
+      const input = {
+        template_id: 'jp_hokkaido_6d3s1c_v1',
+        user_id: 'test_user_123',
+        start_date: startDate,
+        people_count: 4,
+        note: '家庭滑雪之旅',
+      };
+
+      const result = createTripFromTemplate(input);
+
+      expect(result.start_date).toEqual(startDate);
+      expect(result.people_count).toBe(4);
+      expect(result.note).toBe('家庭滑雪之旅');
+    });
+
+    it('應該允許自定義天數', () => {
+      const input = {
+        template_id: 'jp_hokkaido_6d3s1c_v1',
+        user_id: 'test_user_123',
+        days: 4,  // 只要 4 天而不是預設的 6 天
+      };
+
+      const result = createTripFromTemplate(input);
+
+      expect(result.days).toHaveLength(4);
+      expect(result.days[0].day_index).toBe(1);
+      expect(result.days[3].day_index).toBe(4);
+    });
   });
 
   describe('Day 生成', () => {
@@ -141,6 +172,26 @@ describe('createTripFromTemplate', () => {
       expect(day1Items[0].time_hint).toBe('morning');     // flight
       expect(day1Items[1].time_hint).toBe('afternoon');   // transfer
       expect(day1Items[2].time_hint).toBe('evening');     // hotel
+    });
+
+    it('應該初始化新的欄位為 null', () => {
+      const input = {
+        template_id: 'jp_hokkaido_6d3s1c_v1',
+        user_id: 'test_user_123',
+      };
+
+      const result = createTripFromTemplate(input);
+      const firstItem = result.days[0].items[0];
+
+      // 新欄位應該初始化為 null
+      expect(firstItem.date).toBeNull();
+      expect(firstItem.time).toBeNull();
+      expect(firstItem.link).toBeNull();
+
+      // Trip 層級的新欄位
+      expect(result.start_date).toBeNull();
+      expect(result.people_count).toBeNull();
+      expect(result.note).toBeNull();
     });
   });
 

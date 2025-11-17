@@ -61,7 +61,11 @@ export interface Template {
 export interface CreateTripFromTemplateInput {
   template_id: string;
   user_id: string;
-  title?: string; // 可選：用戶自定義標題
+  title?: string;             // 可選：用戶自定義標題
+  start_date?: Date | null;   // 出發日期
+  days?: number;              // 旅程天數（若不同於模板預設）
+  people_count?: number | null; // 預計同行人數
+  note?: string | null;       // 簡短備註
 }
 
 /**
@@ -72,6 +76,9 @@ export interface TripData {
   template_id: string;
   user_id: string;
   title: string;
+  start_date: Date | null;      // 旅程開始日期
+  people_count: number | null;  // 預計同行人數
+  note: string | null;          // 簡短備註
   created_at: Date;
   updated_at: Date;
 }
@@ -96,9 +103,12 @@ export interface ItemData {
   day_id: string;
   type: ItemType;
   title: string;
-  time_hint: TimeHint | null;
-  location: string | null;
-  note: string | null;
+  date: Date | null;           // 具體日期
+  time: string | null;         // 具體時間（如 "14:30"）
+  time_hint: TimeHint | null;  // 時間提示（早上/下午/晚上）
+  location: string | null;     // 地點
+  link: string | null;         // 相關連結（如訂單、地圖）
+  note: string | null;         // 備註
   created_at: Date;
 }
 
@@ -109,4 +119,83 @@ export interface TripWithDetails extends TripData {
   days: (DayData & {
     items: ItemData[];
   })[];
+}
+
+/**
+ * Checklist 項目類別
+ */
+export type ChecklistCategory =
+  | 'before_booking'    // 訂購前確認
+  | 'after_booking'     // 訂購後準備
+  | 'before_departure'  // 出發前確認
+  | 'other';            // 其他
+
+/**
+ * Checklist 項目資料
+ */
+export interface ChecklistItem {
+  id: string;
+  trip_id: string;
+  category: ChecklistCategory;
+  title: string;
+  completed: boolean;
+  order: number;
+  created_at: Date;
+}
+
+/**
+ * Checklist 模板項目
+ */
+export interface ChecklistTemplateItem {
+  category: ChecklistCategory;
+  title: string;
+  order: number;
+}
+
+/**
+ * 打包清單項目類別
+ */
+export type PackingCategory =
+  | 'clothing'      // 服裝防寒
+  | 'documents'     // 證件金流
+  | 'medicine'      // 藥品
+  | 'ski_gear'      // 雪具護具
+  | 'other';        // 其他
+
+/**
+ * 打包清單項目資料
+ */
+export interface PackingItem {
+  id: string;
+  trip_id: string;
+  category: PackingCategory;
+  title: string;
+  completed: boolean;
+  order: number;
+  created_at: Date;
+}
+
+/**
+ * 打包清單模板項目
+ */
+export interface PackingTemplateItem {
+  category: PackingCategory;
+  title: string;
+  order: number;
+}
+
+/**
+ * Checklist 模板（對應不同的 trip template）
+ */
+export interface ChecklistTemplate {
+  template_id: string;
+  items: ChecklistTemplateItem[];
+}
+
+/**
+ * 打包清單模板（對應不同的 trip template）
+ */
+export interface PackingTemplate {
+  template_id: string;
+  items: PackingTemplateItem[];
 }

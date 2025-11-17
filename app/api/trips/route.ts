@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createTripFromTemplate } from '@/lib/services/trip';
+import { createChecklistFromTemplate, createPackingFromTemplate } from '@/lib/services/checklist';
 import { db } from '@/lib/db';
 import { CreateTripSchema, GetTripsSchema } from '@/lib/validation/schemas';
 import { z } from 'zod';
 
 /**
  * POST /api/trips
- * 從模板創建新旅程
+ * 從模板創建新旅程（包含 Checklist 和 Packing 清單）
  */
 export async function POST(request: NextRequest) {
   try {
@@ -15,13 +16,36 @@ export async function POST(request: NextRequest) {
     // 验证输入
     const validatedData = CreateTripSchema.parse(body);
 
+    // 1. 創建 Trip
     const trip = createTripFromTemplate({
       template_id: validatedData.template_id,
       user_id: validatedData.user_id,
       title: validatedData.title,
+      start_date: validatedData.start_date ? new Date(validatedData.start_date) : null,
+      days: validatedData.days,
+      people_count: validatedData.people_count ?? null,
+      note: validatedData.note ?? null,
     });
 
     await db.createTrip(trip);
+
+    // 2. 創建 Checklist 項目
+    const checklistItems = createChecklistFromTemplate(
+      validatedData.template_id,
+      trip.id
+    );
+    if (checklistItems.length > 0) {
+      await db.createChecklistItems(checklistItems);
+    }
+
+    // 3. 創建 Packing 項目
+    const packingItems = createPackingFromTemplate(
+      validatedData.template_id,
+      trip.id
+    );
+    if (packingItems.length > 0) {
+      await db.createPackingItems(packingItems);
+    }
 
     return NextResponse.json(trip, { status: 201 });
   } catch (error) {
