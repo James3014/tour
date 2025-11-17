@@ -53,6 +53,10 @@ export default function TripDetailPage() {
   const [editForm, setEditForm] = useState<Partial<ItemData>>({});
   const [saving, setSaving] = useState(false);
 
+  // Item adding state
+  const [addingToDayId, setAddingToDayId] = useState<string | null>(null);
+  const [addForm, setAddForm] = useState<Partial<ItemData>>({});
+
   useEffect(() => {
     if (!params.id) return;
 
@@ -157,6 +161,48 @@ export default function TripDetailPage() {
       setTrip(updatedTrip);
     } catch (error) {
       alert('刪除失敗，請稍後再試');
+    }
+  };
+
+  const startAddingItem = (dayId: string) => {
+    setAddingToDayId(dayId);
+    setAddForm({
+      type: 'other',
+      title: '',
+      time_hint: null,
+    });
+  };
+
+  const cancelAdding = () => {
+    setAddingToDayId(null);
+    setAddForm({});
+  };
+
+  const saveNewItem = async (dayId: string) => {
+    if (!addForm.title) return;
+
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/trips/days/${dayId}/items`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...addForm,
+          date: addForm.date || null,
+          time: addForm.time || null,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to create item');
+
+      // Refresh trip data
+      const updatedTrip = await fetch(`/api/trips/${params.id}`).then((res) => res.json());
+      setTrip(updatedTrip);
+      cancelAdding();
+    } catch (error) {
+      alert('新增失敗，請稍後再試');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -497,7 +543,135 @@ export default function TripDetailPage() {
                       )}
                     </div>
 
-                    <button className="w-full mt-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                    {/* Add Item Form */}
+                    {addingToDayId === day.id && (
+                      <div className="mt-3 border border-green-500 rounded-lg p-4 bg-green-50">
+                        <h4 className="font-bold mb-3">新增項目</h4>
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                類型
+                              </label>
+                              <select
+                                value={addForm.type || 'other'}
+                                onChange={(e) => setAddForm({ ...addForm, type: e.target.value as ItemType })}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                              >
+                                {Object.entries(ITEM_TYPE_LABELS).map(([value, label]) => (
+                                  <option key={value} value={value}>{label}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                時段
+                              </label>
+                              <select
+                                value={addForm.time_hint || ''}
+                                onChange={(e) => setAddForm({ ...addForm, time_hint: (e.target.value || null) as TimeHint | null })}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                              >
+                                <option value="">不指定</option>
+                                {Object.entries(TIME_HINT_LABELS).map(([value, label]) => (
+                                  <option key={value} value={value}>{label}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              標題 *
+                            </label>
+                            <input
+                              type="text"
+                              value={addForm.title || ''}
+                              onChange={(e) => setAddForm({ ...addForm, title: e.target.value })}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                              placeholder="例如：去程航班"
+                              required
+                              autoFocus
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                具體時間
+                              </label>
+                              <input
+                                type="time"
+                                value={addForm.time || ''}
+                                onChange={(e) => setAddForm({ ...addForm, time: e.target.value || null })}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                地點
+                              </label>
+                              <input
+                                type="text"
+                                value={addForm.location || ''}
+                                onChange={(e) => setAddForm({ ...addForm, location: e.target.value || null })}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                placeholder="例如：新千歲機場"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              相關連結
+                            </label>
+                            <input
+                              type="text"
+                              value={addForm.link || ''}
+                              onChange={(e) => setAddForm({ ...addForm, link: e.target.value || null })}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                              placeholder="例如：訂單連結、Google Maps"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              備註
+                            </label>
+                            <textarea
+                              value={addForm.note || ''}
+                              onChange={(e) => setAddForm({ ...addForm, note: e.target.value || null })}
+                              rows={3}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                              placeholder="其他需要記錄的資訊"
+                            />
+                          </div>
+
+                          <div className="flex gap-2 justify-end pt-2">
+                            <button
+                              onClick={cancelAdding}
+                              disabled={saving}
+                              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
+                            >
+                              取消
+                            </button>
+                            <button
+                              onClick={() => saveNewItem(day.id)}
+                              disabled={saving || !addForm.title}
+                              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                            >
+                              {saving ? '新增中...' : '新增'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={() => startAddingItem(day.id)}
+                      disabled={addingToDayId === day.id}
+                      className="w-full mt-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
+                    >
                       + 新增項目
                     </button>
                   </div>
