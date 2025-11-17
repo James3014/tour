@@ -222,6 +222,22 @@ export default function TripDetailPage() {
     }
   };
 
+  const togglePackingItemHandler = async (itemId: string) => {
+    try {
+      const response = await fetch(`/api/trips/packing/${itemId}`, {
+        method: 'PATCH',
+      });
+
+      if (!response.ok) throw new Error('Failed to toggle packing item');
+
+      // Refresh packing data
+      const updatedPacking = await fetch(`/api/trips/${params.id}/packing`).then((res) => res.json());
+      setPacking(updatedPacking);
+    } catch (error) {
+      alert('更新失敗，請稍後再試');
+    }
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen p-8">
@@ -770,7 +786,7 @@ export default function TripDetailPage() {
                           <input
                             type="checkbox"
                             checked={item.completed}
-                            onChange={() => alert('勾選功能即將實現')}
+                            onChange={() => togglePackingItemHandler(item.id)}
                             className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                           />
                           <span className={item.completed ? 'line-through text-gray-400' : ''}>

@@ -92,3 +92,16 @@ export function toggleChecklistItem(item: ChecklistItem): ChecklistItem {
     completed: !item.completed,
   };
 }
+
+/**
+ * 切換 Packing 項目的勾選狀態
+ *
+ * @param item - 要切換的 Packing 項目
+ * @returns 新的 PackingItem（completed 狀態已切換）
+ */
+export function togglePackingItem(item: PackingItem): PackingItem {
+  return {
+    ...item,
+    completed: !item.completed,
+  };
+}
