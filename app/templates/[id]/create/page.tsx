@@ -50,7 +50,7 @@ export default function CreateTripPage() {
           template_id: template.template_id,
           user_id: 'demo_user', // TODO: 實際使用者 ID
           title,
-          start_date: startDate || null,
+          start_date: startDate ? new Date(startDate).toISOString() : null,
           days,
           people_count: peopleCount ? parseInt(peopleCount) : null,
           note: note || null,
@@ -58,7 +58,9 @@ export default function CreateTripPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create trip');
+        const errorData = await response.json();
+        console.error('API Error:', errorData);
+        throw new Error(errorData.error || 'Failed to create trip');
       }
 
       const trip = await response.json();
@@ -66,7 +68,8 @@ export default function CreateTripPage() {
       // Redirect to trip detail page
       router.push(`/trips/${trip.id}`);
     } catch (error) {
-      alert('建立旅程失敗，請稍後再試');
+      const message = error instanceof Error ? error.message : '未知錯誤';
+      alert(`建立旅程失敗：${message}`);
       setSubmitting(false);
     }
   };
