@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // 验证输入
+    // 驗證輸入
     const validatedData = CreateTripSchema.parse(body);
 
     // 1. 創建 Trip
@@ -49,15 +49,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(trip, { status: 201 });
   } catch (error) {
-    // Zod 验证错误
+    // Zod 驗證錯誤
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: '输入验证失败', details: error.issues },
+        { error: '輸入驗證失敗', details: error.issues },
         { status: 400 }
       );
     }
 
-    // 其他错误
+    // 其他錯誤
     const message = error instanceof Error ? error.message : '未知錯誤';
     return NextResponse.json({ error: message }, { status: 500 });
   }
@@ -65,29 +65,29 @@ export async function POST(request: NextRequest) {
 
 /**
  * GET /api/trips?user_id=xxx
- * 獲取用戶的所有旅程
+ * 獲取使用者的所有旅程
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('user_id');
 
-    // 验证输入
+    // 驗證輸入
     const validatedData = GetTripsSchema.parse({ user_id: userId });
 
     const trips = await db.getAllTrips(validatedData.user_id);
 
     return NextResponse.json(trips);
   } catch (error) {
-    // Zod 验证错误
+    // Zod 驗證錯誤
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: '输入验证失败', details: error.issues },
+        { error: '輸入驗證失敗', details: error.issues },
         { status: 400 }
       );
     }
 
-    // 其他错误
+    // 其他錯誤
     const message = error instanceof Error ? error.message : '未知錯誤';
     return NextResponse.json({ error: message }, { status: 500 });
   }

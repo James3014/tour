@@ -14,7 +14,7 @@ export async function GET(
   try {
     const { id } = await params;
 
-    // 验证输入
+    // 驗證輸入
     const validatedData = GetTripByIdSchema.parse({ id });
 
     const trip = await db.getTripById(validatedData.id);
@@ -25,15 +25,15 @@ export async function GET(
 
     return NextResponse.json(trip);
   } catch (error) {
-    // Zod 验证错误
+    // Zod 驗證錯誤
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: '输入验证失败', details: error.issues },
+        { error: '輸入驗證失敗', details: error.issues },
         { status: 400 }
       );
     }
 
-    // 其他错误
+    // 其他錯誤
     const message = error instanceof Error ? error.message : '未知錯誤';
     return NextResponse.json({ error: message }, { status: 500 });
   }

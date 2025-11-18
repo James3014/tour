@@ -4,7 +4,7 @@ MVP 版本 - 基於模板的滑雪旅程規劃工具
 
 ## 🚀 在線演示
 
-**Zeabur 部署:** https://tour-app.zeabur.app
+**Zeabur 部署:** https://tour-app-2.zeabur.app
 
 ## ✨ 核心功能
 
@@ -29,10 +29,12 @@ MVP 版本 - 基於模板的滑雪旅程規劃工具
   - 從模板創建新旅程
   - 自動展開所有天數（Day）和項目（Item）
   - 多日自動生成（2-10 天可配置）
+  - 支援自訂標題、日期、天數、人數、備註
 
 - **旅程編輯**（Flow 2）
   - Day-by-day 多日展示
   - 雙 Tab 切換：行程 / 準備事項
+  - 展開/收合單個 Day 或全部 Day
 
 #### 3. Item 項目管理 ✅（TDD 開發）
 - **Item 編輯**
@@ -40,8 +42,9 @@ MVP 版本 - 基於模板的滑雪旅程規劃工具
   - 8 種類型：航班、住宿、交通、滑雪、課程、待辦、筆記、其他
   - 完整欄位：類型、標題、日期、時間、時段、地點、連結、備註
   - 即時儲存、取消編輯
+  - Hover 顯示編輯/刪除按鈕
 
-- **Item 新增**（NEW! TDD 實現）
+- **Item 新增**（TDD 實現）
   - 內嵌新增表單（綠色邊框）
   - 與編輯表單一致的欄位
   - 驗證：標題必填
@@ -53,21 +56,36 @@ MVP 版本 - 基於模板的滑雪旅程規劃工具
   - API: DELETE `/api/trips/items/[id]`
 
 #### 4. 行前準備清單 ✅（TDD 開發）
-- **Checklist 檢查清單**（NEW! TDD 實現）
+- **Checklist 檢查清單**（TDD 實現）
   - 勾選/取消勾選即時更新
   - 4 大類別：訂購前確認、訂購後準備、出發前確認、其他
   - 已完成項目自動劃線
   - API: PATCH `/api/trips/checklist/[id]`
   - 測試: 6 個單元測試
 
-- **Packing 打包清單**（NEW! TDD 實現）
+- **Packing 打包清單**（TDD 實現）
   - 勾選/取消勾選即時更新
   - 6 大類別：衣物、裝備、配件、電子、盥洗、其他
   - 已完成項目自動劃線
   - API: PATCH `/api/trips/packing/[id]`
   - 測試: 6 個單元測試
 
-#### 5. TDD 開發 ✅
+#### 5. 分享功能 ✅（NEW!）
+- **分享連結生成**
+  - 一鍵複製分享連結
+  - 視覺反饋：「✓ 已複製連結」（2 秒）
+  - 連結格式：`/trips/[id]/share`
+
+- **唯讀分享頁面** (`/trips/[id]/share`)
+  - 藍色唯讀提示橫幅
+  - 完整旅程資訊展示
+  - 所有 Checkbox 為 disabled 狀態
+  - 無編輯/刪除/新增按鈕
+  - 保留 Day 展開/收合功能
+  - 保留 Tab 切換功能
+  - Footer CTA：「建立我的滑雪旅程」
+
+#### 6. TDD 開發 ✅
 - **33/33 單元測試通過** ✅
   - Trip 創建與多日展開（15 tests）
   - Item 新增功能（6 tests）
@@ -90,7 +108,7 @@ MVP 版本 - 基於模板的滑雪旅程規劃工具
 
 架構設計（Linus 風格）：
 - 簡單：Template → Trip/Day/Item 三層結構
-- 清晰：數據所有權明確，零特殊情況
+- 清晰：資料所有權明確，零特殊情況
 - 可擴展：硬編碼模板可輕鬆遷移到資料庫
 ```
 
@@ -116,6 +134,8 @@ MVP 版本 - 基於模板的滑雪旅程規劃工具
 - `PATCH /api/trips/checklist/:id` - 切換 Checklist 項目狀態
 - `PATCH /api/trips/packing/:id` - 切換 Packing 項目狀態
 
+**總計：** 11 個 API 端點
+
 ## 📂 專案結構
 
 ```
@@ -127,7 +147,9 @@ tour/
 │   │   └── [id]/
 │   │       ├── page.tsx                   # 模板詳情頁
 │   │       └── create/page.tsx            # 創建旅程頁
-│   ├── trips/[id]/page.tsx               # 旅程詳情頁（主要編輯介面）
+│   ├── trips/[id]/
+│   │   ├── page.tsx                       # 旅程詳情頁（主要編輯介面）
+│   │   └── share/page.tsx                 # 分享頁（唯讀模式）✨ NEW
 │   └── api/
 │       ├── templates/route.ts             # GET /api/templates
 │       └── trips/
@@ -142,6 +164,7 @@ tour/
 │           └── days/[id]/items/route.ts  # POST /api/trips/days/:id/items (新增)
 ├── lib/
 │   ├── types/template.ts                  # TypeScript 類型定義
+│   ├── validation/schemas.ts              # Zod 驗證 schemas
 │   ├── templates/                         # 硬編碼模板
 │   │   ├── hokkaido-6d.ts
 │   │   ├── hokkaido-8d-deluxe.ts
@@ -154,13 +177,13 @@ tour/
 │   │   └── index.ts
 │   ├── services/
 │   │   ├── trip.ts                       # Trip 核心邏輯
-│   │   ├── item.ts                       # Item 核心邏輯（NEW）
-│   │   ├── checklist.ts                  # Checklist/Packing 核心邏輯（NEW）
+│   │   ├── item.ts                       # Item 核心邏輯
+│   │   ├── checklist.ts                  # Checklist/Packing 核心邏輯
 │   │   └── __tests__/
 │   │       ├── trip.test.ts             # 15 tests
-│   │       ├── item.test.ts             # 6 tests（NEW）
-│   │       ├── checklist.test.ts        # 6 tests（NEW）
-│   │       └── packing.test.ts          # 6 tests（NEW）
+│   │       ├── item.test.ts             # 6 tests
+│   │       ├── checklist.test.ts        # 6 tests
+│   │       └── packing.test.ts          # 6 tests
 │   └── db/
 │       ├── interface.ts                  # Database 介面定義
 │       ├── memory.ts                     # In-memory 實現
@@ -222,7 +245,7 @@ npm start
 
 訪問 http://localhost:3000
 
-## 📊 數據模型
+## 📊 資料模型
 
 ### 核心實體
 
@@ -245,11 +268,11 @@ interface Template {
 interface TripWithDetails {
   id: string;                   // 唯一識別碼
   template_id: string;          // 來源模板
-  user_id: string;              // 用戶 ID
+  user_id: string;              // 使用者 ID
   title: string;                // 旅程標題
-  start_date: Date | null;      // 開始日期
-  people_count: number | null;  // 人數
-  note: string | null;          // 備註
+  start_date: Date | null;      // 開始日期（可選）
+  people_count: number | null;  // 人數（可選）
+  note: string | null;          // 備註（可選）
   created_at: Date;
   updated_at: Date;
   days: DayWithItems[];         // 天數（含 Items）
@@ -320,7 +343,7 @@ interface PackingItem {
 
 ## 🚧 Roadmap（開發計劃）
 
-### ✅ 已完成（Phase 1 & 2）
+### ✅ 已完成（Phase 1 & 2 & 2.5）
 - ✅ 6 個滑雪模板（硬編碼）
 - ✅ 模板選擇 UI
 - ✅ Flow 1: Template → Create Trip
@@ -328,7 +351,9 @@ interface PackingItem {
 - ✅ Item 完整編輯功能（編輯/新增/刪除）
 - ✅ Checklist 功能（勾選/取消）
 - ✅ Packing List 功能（勾選/取消）
+- ✅ 分享功能（唯讀分享頁面）✨ NEW
 - ✅ 33 個單元測試（TDD 開發）
+- ✅ API 錯誤修復（日期驗證）
 
 ### 🔄 進行中（Phase 3）
 - [ ] Day 新增/刪除功能
@@ -345,10 +370,10 @@ interface PackingItem {
   - Prisma migrate
   - 資料持久化
   - 環境變數配置
-- [ ] 用戶認證
+- [ ] 使用者認證
   - NextAuth.js 整合
   - Google OAuth
-  - 多用戶隔離
+  - 多使用者隔離
 - [ ] UI/UX 優化
   - 添加 favicon
   - 響應式設計
@@ -356,11 +381,11 @@ interface PackingItem {
 
 ### 🌟 未來願景（Phase 5+）
 - [ ] 模板管理後台
-  - 自定義模板
+  - 自訂模板
   - 模板分享
   - 社群模板庫
 - [ ] 協作功能
-  - 分享旅程連結
+  - 分享旅程連結（已完成 ✅）
   - 多人編輯
   - 評論/討論
 - [ ] 進階功能
@@ -373,7 +398,7 @@ interface PackingItem {
 
 **Linus Torvalds 風格**
 - "Talk is cheap. Show me the code."
-- 數據結構優先：好的數據結構 > 複雜的程式碼
+- 資料結構優先：好的資料結構 > 複雜的程式碼
 - 消除特殊情況：通過設計消除 if/else
 - 簡單實用：解決實際問題，不過度設計
 - 向後兼容：Never break userspace
@@ -384,30 +409,36 @@ interface PackingItem {
 - 小步迭代，頻繁提交
 - 100% 核心邏輯測試覆蓋
 
-## 🎯 最近更新（2025-01）
+## 🎯 最近更新（2025-01-18）
 
-### Phase 2 完成 ✅（3 個主要功能）
+### Phase 2.5 完成 ✅（分享功能 + Bug 修復）
 
 **Commit 歷史：**
 ```
-5ccc218 feat: 實現 Packing 勾選功能（TDD）
-6295e51 feat: 實現 Checklist 勾選功能（TDD）
-1d390d8 feat: 實現 Item 新增功能（TDD）
-e930f4c docs: 新增完整測試指南
-b600373 feat: 實現 Item 完整編輯功能
+8071771 fix: 修復 /api/trips 端點的 400 錯誤
+e8100b0 Merge pull request #2 (Trip 分享功能)
+b90748a feat: 實現 Trip 只讀分享功能
+f86d71b Merge pull request #1 (Linus 代碼審查指南)
+88fbb61 docs: 新增詳細功能清單文檔
 ```
 
-**成就：**
-- ✅ 33 個單元測試全部通過
-- ✅ 3 個核心功能完成（Item 新增、Checklist、Packing）
-- ✅ 嚴格遵循 TDD 紅綠重構循環
-- ✅ Linus 原則：簡單、不可變、統一處理
+**新增功能：**
+- ✅ 分享連結生成（一鍵複製）
+- ✅ 唯讀分享頁面 (`/trips/[id]/share`)
+- ✅ 修復日期驗證問題（支援 YYYY-MM-DD 格式）
+
+**Bug 修復：**
+- ✅ 修復 `/api/trips` POST 400 錯誤
+  - 問題：Zod `.datetime()` 驗證器只接受完整 ISO 8601 格式
+  - 解決：改用 `.string().nullish()` 支援 YYYY-MM-DD 格式
+  - 影響：使用者現在可以正常創建旅程
 
 **技術亮點：**
 - 使用 `crypto.randomUUID()` 生成唯一 ID
 - 不可變性：所有狀態切換返回新物件
 - 統一 API 設計：一致的錯誤處理和驗證
 - 內嵌表單：藍色編輯 / 綠色新增，視覺區分清晰
+- 唯讀模式：完整資訊展示 + 所有互動功能 disabled
 
 ## 📄 授權
 
@@ -415,4 +446,4 @@ MIT License
 
 ---
 
-**開發中** - Phase 2 完成 | 33/33 測試通過 | TDD + Linus 風格 ✅
+**開發中** - Phase 2.5 完成 | 33/33 測試通過 | 分享功能上線 ✅
