@@ -14,7 +14,11 @@ export const CreateTripSchema = z.object({
   template_id: z.string().min(1, '模板 ID 不能为空').max(100, '模板 ID 过长'),
   user_id: z.string().min(1, '用户 ID 不能为空').max(100, '用户 ID 过长'),
   title: z.string().max(200, '标题过长').optional(),
-  start_date: z.coerce.date().optional().nullable(),  // 兼容 YYYY-MM-DD 字符串
+  // 修复：使用 preprocess 确保 null 和空字串在 coercion 前被正确处理
+  start_date: z.preprocess(
+    (val) => (val === null || val === '' || val === undefined ? null : val),
+    z.coerce.date().nullable()
+  ).optional(),
   days: z.number().int().min(1).max(30).optional(),         // 旅程天数 (1-30)
   people_count: z.number().int().min(1).max(100).optional().nullable(), // 同行人数 (1-100)
   note: z.string().max(500, '备注过长').optional().nullable(), // 备注 (最多 500 字)
