@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { TripWithDetails, ChecklistItem, PackingItem, ItemData } from '@/lib/types/template';
+import { tripApi } from '@/lib/api/client';
 
 interface UseTripReturn {
     trip: TripWithDetails | null;
@@ -30,12 +31,9 @@ export function useTrip(tripId: string): UseTripReturn {
         try {
             setLoading(true);
             const [tripData, checklistData, packingData] = await Promise.all([
-                fetch(`/api/trips/${tripId}`).then((res) => {
-                    if (!res.ok) throw new Error('Failed to fetch trip');
-                    return res.json();
-                }),
-                fetch(`/api/trips/${tripId}/checklist`).then((res) => res.ok ? res.json() : []),
-                fetch(`/api/trips/${tripId}/packing`).then((res) => res.ok ? res.json() : []),
+                tripApi.getTrip(tripId),
+                tripApi.getChecklist(tripId),
+                tripApi.getPacking(tripId),
             ]);
 
             setTrip(tripData);
@@ -57,7 +55,7 @@ export function useTrip(tripId: string): UseTripReturn {
 
     const refresh = async () => {
         try {
-            const updatedTrip = await fetch(`/api/trips/${tripId}`).then((res) => res.json());
+            const updatedTrip = await tripApi.getTrip(tripId);
             setTrip(updatedTrip);
         } catch (err) {
             console.error('Refresh failed', err);
@@ -84,17 +82,11 @@ export function useTrip(tripId: string): UseTripReturn {
 
         try {
             // 2. 發送請求
-            const response = await fetch(`/api/trips/items/${itemId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...data,
-                    date: data.date || null,
-                    time: data.time || null,
-                }),
+            await tripApi.updateItem(itemId, {
+                ...data,
+                date: data.date || null,
+                time: data.time || null,
             });
-
-            if (!response.ok) throw new Error('Failed to update item');
 
             // 3. 後台靜默刷新以確保數據一致
             await refresh();
@@ -116,11 +108,7 @@ export function useTrip(tripId: string): UseTripReturn {
         }));
 
         try {
-            const response = await fetch(`/api/trips/items/${itemId}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) throw new Error('Failed to delete item');
+            await tripApi.deleteItem(itemId);
             await refresh();
         } catch (err) {
             setTrip(previousTrip);
@@ -129,24 +117,15 @@ export function useTrip(tripId: string): UseTripReturn {
     };
 
     const addItem = async (dayId: string, data: Partial<ItemData>) => {
-        // 新增項目較難做樂觀更新（因為沒有 ID），所以這裡只做標準請求
-        // 如果需要極致體驗，可以生成臨時 ID，但複雜度會增加
-        const response = await fetch(`/api/trips/days/${dayId}/items`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                ...data,
-                date: data.date || null,
-                time: data.time || null,
-            }),
+        await tripApi.createItem(dayId, {
+            ...data,
+            date: data.date || null,
+            time: data.time || null,
         });
-
-        if (!response.ok) throw new Error('Failed to create item');
         await refresh();
     };
 
     const toggleChecklist = async (itemId: string) => {
-        // 樂觀更新 Checklist
         setChecklist((prev) =>
             prev.map((item) =>
                 item.id === itemId ? { ...item, completed: !item.completed } : item
@@ -154,14 +133,8 @@ export function useTrip(tripId: string): UseTripReturn {
         );
 
         try {
-            const response = await fetch(`/api/trips/checklist/${itemId}`, {
-                method: 'PATCH',
-            });
-
-            if (!response.ok) throw new Error('Failed to toggle checklist item');
-            // 不用刷新，因為我們已經知道結果了
+            await tripApi.toggleChecklist(itemId);
         } catch (err) {
-            // 回滾
             setChecklist((prev) =>
                 prev.map((item) =>
                     item.id === itemId ? { ...item, completed: !item.completed } : item
@@ -172,7 +145,6 @@ export function useTrip(tripId: string): UseTripReturn {
     };
 
     const togglePacking = async (itemId: string) => {
-        // 樂觀更新 Packing
         setPacking((prev) =>
             prev.map((item) =>
                 item.id === itemId ? { ...item, completed: !item.completed } : item
@@ -180,13 +152,8 @@ export function useTrip(tripId: string): UseTripReturn {
         );
 
         try {
-            const response = await fetch(`/api/trips/packing/${itemId}`, {
-                method: 'PATCH',
-            });
-
-            if (!response.ok) throw new Error('Failed to toggle packing item');
+            await tripApi.togglePacking(itemId);
         } catch (err) {
-            // 回滾
             setPacking((prev) =>
                 prev.map((item) =>
                     item.id === itemId ? { ...item, completed: !item.completed } : item

@@ -51,8 +51,7 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
         } catch (error) {
             if (error instanceof z.ZodError) {
                 const newErrors: Record<string, string> = {};
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (error as any).errors.forEach((err: any) => {
+                error.errors.forEach((err) => {
                     if (err.path[0]) {
                         newErrors[err.path[0] as string] = err.message;
                     }
