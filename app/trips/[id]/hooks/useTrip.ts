@@ -131,12 +131,47 @@ export function useTrip(tripId: string): UseTripReturn {
     };
 
     const addItem = async (dayId: string, data: Partial<ItemData>) => {
-        await tripApi.createItem(dayId, {
-            ...data,
+        // 1. 創建臨時 Item 用於樂觀更新
+        const tempItem: ItemData = {
+            id: `temp-${Date.now()}`, // 臨時 ID，後端會返回真實 ID
+            day_id: dayId,
+            type: data.type || 'other',
+            title: data.title || '',
             date: data.date || null,
             time: data.time || null,
-        });
-        await refresh();
+            time_hint: data.time_hint || null,
+            location: data.location || null,
+            link: data.link || null,
+            note: data.note || null,
+            created_at: new Date(),
+        };
+
+        // 2. 樂觀更新 UI - 立即顯示新 Item
+        const previousTrip = trip;
+        optimisticUpdate((prev) => ({
+            ...prev,
+            days: prev.days.map((day) =>
+                day.id === dayId
+                    ? { ...day, items: [...day.items, tempItem] }
+                    : day
+            ),
+        }));
+
+        try {
+            // 3. 發送請求
+            await tripApi.createItem(dayId, {
+                ...data,
+                date: data.date || null,
+                time: data.time || null,
+            });
+
+            // 4. 刷新以獲取真實 ID
+            await refresh();
+        } catch (err) {
+            // 5. 失敗回滾
+            setTrip(previousTrip);
+            throw err;
+        }
     };
 
     const toggleChecklist = async (itemId: string) => {
