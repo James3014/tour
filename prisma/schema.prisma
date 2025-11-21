@@ -8,13 +8,16 @@ datasource db {
 }
 
 model Trip {
-  id          String   @id @default(cuid())
-  template_id String
-  user_id     String
-  title       String
-  days        Day[]
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  id           String    @id @default(cuid())
+  template_id  String
+  user_id      String
+  title        String
+  start_date   DateTime?
+  people_count Int?
+  note         String?
+  days         Day[]
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
 
   @@index([user_id])
   @@index([template_id])
@@ -35,15 +38,42 @@ model Day {
 }
 
 model Item {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   day_id     String
-  day        Day      @relation(fields: [day_id], references: [id], onDelete: Cascade)
+  day        Day       @relation(fields: [day_id], references: [id], onDelete: Cascade)
   type       String
   title      String
+  date       DateTime?
+  time       String?
   time_hint  String?
   location   String?
+  link       String?
   note       String?
-  created_at DateTime @default(now())
+  created_at DateTime  @default(now())
 
   @@index([day_id])
+}
+
+model ChecklistItem {
+  id         String   @id @default(cuid())
+  trip_id    String
+  category   String
+  title      String
+  completed  Boolean  @default(false)
+  order      Int
+  created_at DateTime @default(now())
+
+  @@index([trip_id])
+}
+
+model PackingItem {
+  id         String   @id @default(cuid())
+  trip_id    String
+  category   String
+  title      String
+  completed  Boolean  @default(false)
+  order      Int
+  created_at DateTime @default(now())
+
+  @@index([trip_id])
 }
