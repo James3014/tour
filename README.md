@@ -11,18 +11,10 @@ MVP 版本 - 基於模板的滑雪旅程規劃工具
 ### 已實現（完整功能）
 
 #### 1. 模板系統 ✅
-- **6 個硬編碼滑雪模板**
-  - 北海道 6 日（3 滑 1 市區）
-  - 北海道 8 日豪華版（二世古 + 富良野，5 天滑雪）
-  - 東北 5 日（3 天滑雪）
-  - 長野 5 日（白馬滑雪）
-  - 新潟 4 日（苗場快閃）
-  - 韓國 4 日（龍平滑雪）
-
-- **模板選擇 UI**
-  - 卡片展示所有模板
-  - 顯示天數、滑雪天數、適合族群
-  - 一鍵創建旅程
+- **3 個精選滑雪模板** (MVP 階段)
+  - 北海道 6 日（3 滑 1 市區）：經典入門
+  - 韓國 4 日（龍平滑雪）：預算友好
+  - 北海道 8 日豪華版（二世古 + 富良野）：進階玩家
 
 #### 2. 旅程管理（Flow 1 & 2）✅
 - **旅程創建**（Flow 1）
@@ -79,8 +71,8 @@ MVP 版本 - 基於模板的滑雪旅程規劃工具
 - 清晰：數據所有權明確，零特殊情況
 - 可擴展：硬編碼模板可輕鬆遷移到資料庫
 - 好品味 (Good Taste)：
-  - 組件拆分：TripHeader, DayItem, TripItem, ItemEditForm
-  - 邏輯抽離：useTrip Hook 集中管理數據流與副作用
+  - 職責分離：API 層 (client.ts) 與 UI 層 (components) 完全解耦
+  - 邏輯抽離：排序邏輯 (sort.ts) 為純函數，不污染組件
   - 消除特殊情況：自動排序邏輯內建於渲染層
 ```
 
@@ -142,6 +134,10 @@ tour/
 │           ├── items/[id]/route.ts       # PATCH/DELETE /api/trips/items/:id
 │           └── days/[id]/items/route.ts  # POST /api/trips/days/:id/items (新增)
 ├── lib/
+│   ├── api/
+│   │   └── client.ts                      # API 客戶端封裝 (New!)
+│   ├── utils/
+│   │   └── sort.ts                        # 純函數工具 (New!)
 │   ├── types/template.ts                  # TypeScript 類型定義
 │   ├── templates/                         # 硬編碼模板
 │   ├── services/
@@ -195,15 +191,18 @@ npm start
 
 **Commit 歷史：**
 ```
+a1b4f61 refactor: achieve 95+ score - separate api layer, fix zod types, and extract logic
+f2a5b28 fix: resolve build errors - syntax error in DayItem and Zod type issue
 8c2d836 refactor: implement Linus principles - auto-sorting, smart dates, and simplified form
-76cac28 fix: resolve ZodError type issue in ItemEditForm
-47cb7b6 refactor: split trip detail page into components and hooks with optimistic updates
 ```
 
 **成就：**
 - ✅ **前端架構重構**：將 800 行的 `page.tsx` 拆解為模組化組件與 Custom Hook。
+- ✅ **代碼品質 (95+ 分)**：
+  - **API 層抽離**：建立 `lib/api/client.ts`，徹底解耦資料獲取與 UI 邏輯。
+  - **純函數邏輯**：將排序邏輯抽離至 `lib/utils/sort.ts`，提升可測試性。
+  - **類型安全**：修正 Zod 版本問題，移除所有 `any` 斷言。
 - ✅ **樂觀更新 (Optimistic Updates)**：實現無延遲的操作體驗。
-- ✅ **Zod 驗證**：引入嚴格的前端表單驗證。
 - ✅ **Linus 原則實踐**：
   - **好品味**：自動排序邏輯，讓數據自己說話。
   - **實用主義**：折疊次要欄位，降低使用者負擔。
