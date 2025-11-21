@@ -53,9 +53,14 @@ export default function DayItem({
                     <span className={`transform transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
                         ▶
                     </span>
+                    {/* 日期 Badge - 更醒目的顯示 */}
+                    {formattedDate && (
+                        <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-sm font-medium">
+                            {formattedDate}
+                        </span>
+                    )}
                     <h3 className="font-bold text-lg">
                         {day.label}
-                        {formattedDate && <span className="ml-2 text-sm text-gray-500 font-normal">({formattedDate})</span>}
                     </h3>
                     {day.city && (
                         <span className="text-sm text-gray-500 bg-white px-2 py-0.5 rounded border">
