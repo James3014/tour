@@ -138,3 +138,34 @@ describe('CreateTripSchema', () => {
     });
   });
 });
+
+// 模擬完整 API 流程的整合測試
+describe('API Route Integration', () => {
+  it('should preserve date through entire POST flow', () => {
+    const input = {
+      template_id: 'jp_hokkaido_6d3s1c_v1',
+      user_id: 'test_user',
+      title: '測試日期保存',
+      start_date: '2025-12-28',
+      days: 6,
+      people_count: 4,
+    };
+
+    // Step 1: Zod validation (same as API route)
+    const validatedData = CreateTripSchema.parse(input);
+    
+    // Step 2: API route transformation (line 24 in route.ts)
+    const start_date = validatedData.start_date 
+      ? new Date(validatedData.start_date) 
+      : null;
+    
+    // Step 3: Service layer (line 61 in trip.ts)
+    const finalDate = start_date ?? null;
+
+    // Verify each step
+    expect(validatedData.start_date).toBeInstanceOf(Date);
+    expect(start_date).toBeInstanceOf(Date);
+    expect(finalDate).toBeInstanceOf(Date);
+    expect(finalDate?.toISOString()).toContain('2025-12-28');
+  });
+});
