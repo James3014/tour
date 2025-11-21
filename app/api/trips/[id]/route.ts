@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { GetTripByIdSchema } from '@/lib/validation/schemas';
+import { TripWithDetails } from '@/lib/types/template';
 import { z } from 'zod';
 
 /**
@@ -56,12 +57,35 @@ export async function PATCH(
       return NextResponse.json({ error: '缺少旅程 ID' }, { status: 400 });
     }
 
-    const updatedTrip = await db.updateTrip(id, {
-      title: body.title,
-      start_date: body.start_date ? new Date(body.start_date) : null,
-      people_count: body.people_count,
-      note: body.note,
-    });
+    // 準備更新數據
+    const updateData: Partial<TripWithDetails> = {};
+
+    if (body.title !== undefined) {
+      updateData.title = body.title;
+    }
+
+    if (body.start_date !== undefined) {
+      // 處理日期：接受字符串、Date 對象或 null
+      if (body.start_date === null || body.start_date === '') {
+        updateData.start_date = null;
+      } else {
+        const parsedDate = new Date(body.start_date);
+        // 驗證日期是否有效
+        if (!isNaN(parsedDate.getTime())) {
+          updateData.start_date = parsedDate;
+        }
+      }
+    }
+
+    if (body.people_count !== undefined) {
+      updateData.people_count = body.people_count;
+    }
+
+    if (body.note !== undefined) {
+      updateData.note = body.note;
+    }
+
+    const updatedTrip = await db.updateTrip(id, updateData);
 
     return NextResponse.json(updatedTrip);
   } catch (error) {

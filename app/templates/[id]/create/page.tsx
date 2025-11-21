@@ -142,9 +142,11 @@ export default function CreateTripPage() {
                 id="startDate"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+                max={new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <p className="text-xs text-gray-500 mt-1">選填，可以稍後在行程中修改</p>
+              <p className="text-xs text-gray-500 mt-1">選填，設定後各天會自動顯示日期</p>
             </div>
 
             {/* 旅程天數 */}

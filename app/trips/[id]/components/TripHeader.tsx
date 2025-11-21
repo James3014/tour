@@ -25,8 +25,10 @@ export default function TripHeader({ trip, onUpdate }: TripHeaderProps) {
                 <div>
                     <h1 className="text-3xl font-bold mb-2">{trip.title}</h1>
                     <div className="flex items-center gap-4 text-sm text-gray-600">
-                        {trip.start_date && (
+                        {trip.start_date ? (
                             <span>📅 {formatDate(trip.start_date)}</span>
+                        ) : (
+                            <span className="text-gray-400">📅 待填寫出發日期</span>
                         )}
                         <span>
                             {trip.days.length} 天旅程 ・
