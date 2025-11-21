@@ -15,7 +15,7 @@ export interface Database {
   createTrip(trip: TripWithDetails): Promise<TripWithDetails>;
   getTripById(id: string): Promise<TripWithDetails | null>;
   getAllTrips(userId: string): Promise<TripWithDetails[]>;
-  updateTrip(id: string, trip: TripWithDetails): Promise<TripWithDetails>;
+  updateTrip(id: string, trip: Partial<TripWithDetails>): Promise<TripWithDetails>;
   deleteTrip(id: string): Promise<void>;
 
   // Checklist operations

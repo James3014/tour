@@ -32,9 +32,13 @@ class MemoryDB implements Database {
     return Array.from(this.trips.values()).filter((t) => t.user_id === userId);
   }
 
-  async updateTrip(id: string, trip: TripWithDetails): Promise<TripWithDetails> {
-    this.trips.set(id, trip);
-    return trip;
+  async updateTrip(id: string, data: Partial<TripWithDetails>): Promise<TripWithDetails> {
+    const existing = this.trips.get(id);
+    if (!existing) throw new Error('Trip not found');
+
+    const updated = { ...existing, ...data };
+    this.trips.set(id, updated);
+    return updated;
   }
 
   async deleteTrip(id: string): Promise<void> {
