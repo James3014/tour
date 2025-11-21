@@ -15,7 +15,12 @@ import { db as memoryDB } from './memory';
 
 /**
  * 当前使用的数据库
- * 要切换到 Prisma，请注释掉 memoryDB 并取消注释 prismaDB
+ *
+ * ⚠️ 注意：memoryDB 在服务器重启时会丢失所有数据
+ * 生产环境应切换到 prismaDB，需要先：
+ * 1. 更新 prisma/schema.prisma 添加缺失欄位
+ * 2. 运行 npx prisma migrate dev
+ * 3. 实现 lib/db/prisma.ts
  */
 export const db = memoryDB;
 // export const db = prismaDB;
