@@ -10,6 +10,7 @@ interface UseTripReturn {
     error: string | null;
     actions: {
         refresh: () => Promise<void>;
+        updateTrip: (data: Partial<TripWithDetails>) => Promise<void>;
         updateItem: (itemId: string, data: Partial<ItemData>) => Promise<void>;
         deleteItem: (itemId: string) => Promise<void>;
         addItem: (dayId: string, data: Partial<ItemData>) => Promise<void>;
@@ -59,6 +60,19 @@ export function useTrip(tripId: string): UseTripReturn {
             setTrip(updatedTrip);
         } catch (err) {
             console.error('Refresh failed', err);
+        }
+    };
+
+    const updateTrip = async (data: Partial<TripWithDetails>) => {
+        const previousTrip = trip;
+        optimisticUpdate((prev) => ({ ...prev, ...data }));
+
+        try {
+            await tripApi.updateTrip(tripId, data);
+            await refresh();
+        } catch (err) {
+            setTrip(previousTrip);
+            throw err;
         }
     };
 
@@ -171,6 +185,7 @@ export function useTrip(tripId: string): UseTripReturn {
         error,
         actions: {
             refresh,
+            updateTrip,
             updateItem,
             deleteItem,
             addItem,

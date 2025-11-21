@@ -191,6 +191,7 @@ npm start
 
 **Commit 歷史：**
 ```
+83a7342 docs: update README to reflect 95+ score refactoring and actual template status
 a1b4f61 refactor: achieve 95+ score - separate api layer, fix zod types, and extract logic
 f2a5b28 fix: resolve build errors - syntax error in DayItem and Zod type issue
 8c2d836 refactor: implement Linus principles - auto-sorting, smart dates, and simplified form
@@ -207,6 +208,13 @@ f2a5b28 fix: resolve build errors - syntax error in DayItem and Zod type issue
   - **好品味**：自動排序邏輯，讓數據自己說話。
   - **實用主義**：折疊次要欄位，降低使用者負擔。
   - **細節**：智能日期顯示，提升資訊可讀性。
+
+### Bug 修復與優化 (2025-11-21) 🔧
+- **修復日期保存問題 (P1)**：修正 Zod Schema 驗證邏輯，支援 ISO 日期格式，解決出發日期無法保存的問題。
+- **新增旅程編輯功能 (P2)**：實作 `TripEditForm`，允許用戶修改旅程標題、日期、人數與備註。
+- **優化 UI 交互**：
+  - 修正 `TripHeader` 按鈕狀態。
+  - 完善人數顯示邏輯（未填寫時顯示提示）。
 
 ## 📄 授權
 

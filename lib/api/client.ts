@@ -17,6 +17,13 @@ export const tripApi = {
 
     getPacking: (id: string) => fetchJson<PackingItem[]>(`${BASE_URL}/${id}/packing`).catch(() => []),
 
+    updateTrip: (id: string, data: Partial<TripWithDetails>) =>
+        fetchJson<void>(`${BASE_URL}/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        }),
+
     createItem: (dayId: string, data: Partial<ItemData>) =>
         fetchJson<void>(`${BASE_URL}/days/${dayId}/items`, {
             method: 'POST',

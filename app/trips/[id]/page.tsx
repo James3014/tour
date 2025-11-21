@@ -79,7 +79,10 @@ export default function TripDetailPage() {
   return (
     <main className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-5xl mx-auto">
-        <TripHeader trip={trip} />
+        <TripHeader
+          trip={trip}
+          onUpdate={(data) => handleAction(() => actions.updateTrip(data), '更新失敗')}
+        />
 
         {/* Tabs */}
         <div className="bg-white rounded-lg shadow-md mb-6">
