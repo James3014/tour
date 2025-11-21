@@ -50,7 +50,7 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
         } catch (error) {
             if (error instanceof z.ZodError) {
                 const newErrors: Record<string, string> = {};
-                error.errors.forEach((err) => {
+                (error as any).errors.forEach((err: any) => {
                     if (err.path[0]) {
                         newErrors[err.path[0] as string] = err.message;
                     }
