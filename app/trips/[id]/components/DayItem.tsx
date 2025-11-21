@@ -1,4 +1,3 @@
-```typescript
 import { useState } from 'react';
 import { DayData, ItemData } from '@/lib/types/template';
 import TripItem from './TripItem';
@@ -70,7 +69,7 @@ export default function DayItem({
                 className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
             >
                 <div className="flex items-center gap-3">
-                    <span className={`transform transition - transform ${ isExpanded ? 'rotate-90' : '' } `}>
+                    <span className={`transform transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
                         ▶
                     </span>
                     <h3 className="font-bold text-lg">
@@ -102,11 +101,11 @@ export default function DayItem({
                         ) : (
                             sortedItems.map((item) => (
                                 <div key={item.id}>
-                                  <TripItem
-                                    item={item}
-                                    onUpdate={onItemUpdate}
-                                    onDelete={onItemDelete}
-                                  />
+                                    <TripItem
+                                        item={item}
+                                        onUpdate={onItemUpdate}
+                                        onDelete={onItemDelete}
+                                    />
                                 </div>
                             ))
                         )}
