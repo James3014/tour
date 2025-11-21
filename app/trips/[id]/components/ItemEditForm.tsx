@@ -35,6 +35,7 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [saving, setSaving] = useState(false);
+    const [showMore, setShowMore] = useState(false);
 
     const validate = () => {
         try {
@@ -50,7 +51,7 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
         } catch (error) {
             if (error instanceof z.ZodError) {
                 const newErrors: Record<string, string> = {};
-                (error as any).errors.forEach((err: any) => {
+                error.errors.forEach((err) => {
                     if (err.path[0]) {
                         newErrors[err.path[0] as string] = err.message;
                     }
@@ -150,46 +151,58 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                         />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            地點
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.location || ''}
-                            onChange={(e) => handleChange('location', e.target.value || null)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                            placeholder="例如：新千歲機場"
-                        />
+                </div>
+
+                {!showMore ? (
+                    <button
+                        onClick={() => setShowMore(true)}
+                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                    >
+                        <span>+ 顯示更多選項 (地點、連結、備註)</span>
+                    </button>
+                ) : (
+                    <div className="space-y-3 border-t pt-3 mt-2">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                地點
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.location || ''}
+                                onChange={(e) => handleChange('location', e.target.value || null)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                placeholder="例如：新千歲機場"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                相關連結
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.link || ''}
+                                onChange={(e) => handleChange('link', e.target.value || null)}
+                                className={`w-full px-3 py-2 border rounded-lg ${errors.link ? 'border-red-500' : 'border-gray-300'}`}
+                                placeholder="例如：訂單連結、Google Maps"
+                            />
+                            {errors.link && <p className="text-red-500 text-xs mt-1">{errors.link}</p>}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                備註
+                            </label>
+                            <textarea
+                                value={formData.note || ''}
+                                onChange={(e) => handleChange('note', e.target.value || null)}
+                                rows={3}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                placeholder="其他需要記錄的資訊"
+                            />
+                        </div>
                     </div>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        相關連結
-                    </label>
-                    <input
-                        type="text"
-                        value={formData.link || ''}
-                        onChange={(e) => handleChange('link', e.target.value || null)}
-                        className={`w-full px-3 py-2 border rounded-lg ${errors.link ? 'border-red-500' : 'border-gray-300'}`}
-                        placeholder="例如：訂單連結、Google Maps"
-                    />
-                    {errors.link && <p className="text-red-500 text-xs mt-1">{errors.link}</p>}
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        備註
-                    </label>
-                    <textarea
-                        value={formData.note || ''}
-                        onChange={(e) => handleChange('note', e.target.value || null)}
-                        rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        placeholder="其他需要記錄的資訊"
-                    />
-                </div>
+                )}
 
                 <div className="flex gap-2 justify-end pt-2">
                     <button

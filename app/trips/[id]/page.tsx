@@ -88,8 +88,8 @@ export default function TripDetailPage() {
               <button
                 onClick={() => setActiveTab('itinerary')}
                 className={`flex-1 px-6 py-4 font-semibold transition-colors ${activeTab === 'itinerary'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
                   }`}
               >
                 📍 行程
@@ -97,8 +97,8 @@ export default function TripDetailPage() {
               <button
                 onClick={() => setActiveTab('preparation')}
                 className={`flex-1 px-6 py-4 font-semibold transition-colors ${activeTab === 'preparation'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
                   }`}
               >
                 ✅ 行前準備
@@ -141,6 +141,7 @@ export default function TripDetailPage() {
               <DayItem
                 key={day.id}
                 day={day}
+                tripStartDate={trip.start_date ? new Date(trip.start_date) : null}
                 isExpanded={!!expandedDays[day.id]}
                 onToggle={() => toggleDay(day.id)}
                 onItemUpdate={(id, data) => handleAction(() => actions.updateItem(id, data), '儲存失敗')}
