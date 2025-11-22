@@ -63,116 +63,76 @@ export function useTrip(tripId: string): UseTripReturn {
         }
     };
 
-    const updateTrip = async (data: Partial<TripWithDetails>) => {
-        const previousTrip = trip;
-        optimisticUpdate((prev) => ({ ...prev, ...data }));
-
+    // Generic optimistic update helper - eliminates special cases
+    const withOptimistic = async (
+        updater: (prev: TripWithDetails) => TripWithDetails,
+        action: () => Promise<void>
+    ) => {
+        const previous = trip;
+        setTrip((prev) => prev ? updater(prev) : null);
         try {
-            await tripApi.updateTrip(tripId, data);
+            await action();
             await refresh();
         } catch (err) {
-            setTrip(previousTrip);
+            setTrip(previous);
             throw err;
         }
     };
 
-    // 樂觀更新輔助函數
-    const optimisticUpdate = (updater: (prev: TripWithDetails) => TripWithDetails) => {
-        setTrip((prev) => (prev ? updater(prev) : null));
-    };
+    const updateTrip = (data: Partial<TripWithDetails>) =>
+        withOptimistic(
+            (prev) => ({ ...prev, ...data }),
+            () => tripApi.updateTrip(tripId, data)
+        );
 
-    const updateItem = async (itemId: string, data: Partial<ItemData>) => {
-        // 1. 樂觀更新 UI
-        const previousTrip = trip;
-        optimisticUpdate((prev) => ({
-            ...prev,
-            days: prev.days.map((day) => ({
-                ...day,
-                items: day.items.map((item) =>
-                    item.id === itemId ? { ...item, ...data } as ItemData : item
+    const updateItem = (itemId: string, data: Partial<ItemData>) =>
+        withOptimistic(
+            (prev) => ({
+                ...prev,
+                days: prev.days.map((day) => ({
+                    ...day,
+                    items: day.items.map((item) =>
+                        item.id === itemId ? { ...item, ...data } as ItemData : item
+                    ),
+                })),
+            }),
+            () => tripApi.updateItem(itemId, data)
+        );
+
+    const deleteItem = (itemId: string) =>
+        withOptimistic(
+            (prev) => ({
+                ...prev,
+                days: prev.days.map((day) => ({
+                    ...day,
+                    items: day.items.filter((item) => item.id !== itemId),
+                })),
+            }),
+            () => tripApi.deleteItem(itemId)
+        );
+
+    const addItem = (dayId: string, data: Partial<ItemData>) =>
+        withOptimistic(
+            (prev) => ({
+                ...prev,
+                days: prev.days.map((day) =>
+                    day.id === dayId
+                        ? {
+                            ...day,
+                            items: [...day.items, {
+                                ...data,
+                                id: `temp-${Date.now()}`,
+                                day_id: dayId,
+                                type: data.type || 'other',
+                                title: data.title || '',
+                                created_at: new Date(),
+                            } as ItemData]
+                        }
+                        : day
                 ),
-            })),
-        }));
-
-        try {
-            // 2. 發送請求
-            await tripApi.updateItem(itemId, {
-                ...data,
-                date: data.date || null,
-                time: data.time || null,
-            });
-
-            // 3. 後台靜默刷新以確保數據一致
-            await refresh();
-        } catch (err) {
-            // 4. 失敗回滾
-            setTrip(previousTrip);
-            throw err;
-        }
-    };
-
-    const deleteItem = async (itemId: string) => {
-        const previousTrip = trip;
-        optimisticUpdate((prev) => ({
-            ...prev,
-            days: prev.days.map((day) => ({
-                ...day,
-                items: day.items.filter((item) => item.id !== itemId),
-            })),
-        }));
-
-        try {
-            await tripApi.deleteItem(itemId);
-            await refresh();
-        } catch (err) {
-            setTrip(previousTrip);
-            throw err;
-        }
-    };
-
-    const addItem = async (dayId: string, data: Partial<ItemData>) => {
-        // 1. 創建臨時 Item 用於樂觀更新
-        const tempItem: ItemData = {
-            id: `temp-${Date.now()}`, // 臨時 ID，後端會返回真實 ID
-            day_id: dayId,
-            type: data.type || 'other',
-            title: data.title || '',
-            date: data.date || null,
-            time: data.time || null,
-            time_hint: data.time_hint || null,
-            location: data.location || null,
-            link: data.link || null,
-            note: data.note || null,
-            created_at: new Date(),
-        };
-
-        // 2. 樂觀更新 UI - 立即顯示新 Item
-        const previousTrip = trip;
-        optimisticUpdate((prev) => ({
-            ...prev,
-            days: prev.days.map((day) =>
-                day.id === dayId
-                    ? { ...day, items: [...day.items, tempItem] }
-                    : day
-            ),
-        }));
-
-        try {
-            // 3. 發送請求
-            await tripApi.createItem(dayId, {
-                ...data,
-                date: data.date || null,
-                time: data.time || null,
-            });
-
-            // 4. 刷新以獲取真實 ID
-            await refresh();
-        } catch (err) {
-            // 5. 失敗回滾
-            setTrip(previousTrip);
-            throw err;
-        }
-    };
+            }),
+            () => tripApi.createItem(dayId, data)
+        );
 
     const toggleChecklist = async (itemId: string) => {
         setChecklist((prev) =>

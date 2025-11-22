@@ -67,10 +67,13 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
 
         setSaving(true);
         try {
-            await onSave(formData);
+            // Normalize empty strings to null at boundary
+            const normalized = Object.fromEntries(
+                Object.entries(formData).map(([k, v]) => [k, v === '' ? null : v])
+            );
+            await onSave(normalized);
         } catch (error) {
             console.error(error);
-            // 這裡可以顯示一個通用的錯誤訊息，但通常由父組件處理
         } finally {
             setSaving(false);
         }
@@ -78,12 +81,10 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
 
     const handleChange = (field: keyof ItemData, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
-        // 清除該欄位的錯誤
         if (errors[field]) {
             setErrors((prev) => {
-                const newErrors = { ...prev };
-                delete newErrors[field];
-                return newErrors;
+                const { [field]: _, ...rest } = prev;
+                return rest;
             });
         }
     };
@@ -113,7 +114,7 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
                         </label>
                         <select
                             value={formData.time_hint || ''}
-                            onChange={(e) => handleChange('time_hint', (e.target.value || null) as TimeHint | null)}
+                            onChange={(e) => handleChange('time_hint', e.target.value as TimeHint)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                         >
                             <option value="">不指定</option>
@@ -147,7 +148,7 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
                         <input
                             type="time"
                             value={formData.time || ''}
-                            onChange={(e) => handleChange('time', e.target.value || null)}
+                            onChange={(e) => handleChange('time', e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                         />
                     </div>
@@ -169,7 +170,7 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
                             <input
                                 type="text"
                                 value={formData.location || ''}
-                                onChange={(e) => handleChange('location', e.target.value || null)}
+                                onChange={(e) => handleChange('location', e.target.value)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                 placeholder="例如：新千歲機場"
                             />
@@ -182,7 +183,7 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
                             <input
                                 type="text"
                                 value={formData.link || ''}
-                                onChange={(e) => handleChange('link', e.target.value || null)}
+                                onChange={(e) => handleChange('link', e.target.value)}
                                 className={`w-full px-3 py-2 border rounded-lg ${errors.link ? 'border-red-500' : 'border-gray-300'}`}
                                 placeholder="例如：訂單連結、Google Maps"
                             />
@@ -195,7 +196,7 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
                             </label>
                             <textarea
                                 value={formData.note || ''}
-                                onChange={(e) => handleChange('note', e.target.value || null)}
+                                onChange={(e) => handleChange('note', e.target.value)}
                                 rows={3}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                 placeholder="其他需要記錄的資訊"

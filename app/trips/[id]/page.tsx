@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { useTrip } from './hooks/useTrip';
 import TripHeader from './components/TripHeader';
@@ -18,17 +18,19 @@ export default function TripDetailPage() {
 
   const [activeTab, setActiveTab] = useState<TabType>('itinerary');
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({});
+  const hasInitialized = useRef(false);
 
-  // Auto-expand first 2 days when trip loads
+  // Auto-expand first 2 days only on initial load
   useEffect(() => {
-    if (trip?.days && trip.days.length > 0 && Object.keys(expandedDays).length === 0) {
+    if (trip?.days && !hasInitialized.current) {
       const initialExpanded: Record<string, boolean> = {};
       trip.days.slice(0, 2).forEach((day) => {
         initialExpanded[day.id] = true;
       });
       setExpandedDays(initialExpanded);
+      hasInitialized.current = true;
     }
-  }, [trip]); // Only run when trip data is first loaded
+  }, [trip?.days])
 
   const toggleDay = (dayId: string) => {
     setExpandedDays((prev) => ({
