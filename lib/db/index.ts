@@ -18,6 +18,8 @@ import { prismaDB } from './prisma';
  *
  * ✅ 生产环境：prismaDB（持久化存储）
  * 🔧 开发环境：可切换到 memoryDB（快速测试）
+ * 
+ * 重構中：暫時使用 memoryDB 測試新功能
  */
-export const db = prismaDB;
-// export const db = memoryDB;  // 开发快速测试用
+// export const db = prismaDB;
+export const db = memoryDB;  // 重構中：使用 MemoryDB 測試

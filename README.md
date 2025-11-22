@@ -74,6 +74,7 @@ MVP 版本 - 基於模板的滑雪旅程規劃工具
   - 職責分離：API 層 (client.ts) 與 UI 層 (components) 完全解耦
   - 邏輯抽離：排序邏輯 (sort.ts) 為純函數，不污染組件
   - 消除特殊情況：自動排序邏輯內建於渲染層
+  - **O(1) 操作**：重構後所有 Item/Day 操作都是 O(1) 複雜度（之前是 O(n³)）
 ```
 
 ## 🔌 API 端點
@@ -86,6 +87,11 @@ MVP 版本 - 基於模板的滑雪旅程規劃工具
 - `GET /api/trips/:id` - 獲取旅程詳情
 - `PATCH /api/trips/:id` - 更新旅程
 - `DELETE /api/trips/:id` - 刪除旅程
+
+### Days (NEW!)
+- `POST /api/trips/days` - 創建新的 Day
+- `PATCH /api/trips/days/:id` - 更新 Day
+- `DELETE /api/trips/days/:id` - 刪除 Day（cascade delete Items）
 
 ### Items
 - `POST /api/trips/days/:id/items` - 新增 Item 到指定天數

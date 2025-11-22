@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { UpdateItemSchema } from '@/lib/validation/schemas';
+import { UpdateDaySchema } from '@/lib/validation/schemas';
 import { z } from 'zod';
 
 /**
- * PATCH /api/trips/items/[id]
- * 更新單個 Item
- * 
- * 重構：從 50 行減少到 20 行，O(n³) → O(1)
+ * PATCH /api/trips/days/[id]
+ * 更新 Day
  */
 export async function PATCH(
   request: NextRequest,
@@ -18,12 +16,12 @@ export async function PATCH(
     const body = await request.json();
 
     // 驗證輸入
-    const validatedData = UpdateItemSchema.parse(body);
+    const validatedData = UpdateDaySchema.parse(body);
 
-    // 直接更新 - O(1)!
-    const updatedItem = await db.updateItem(id, validatedData);
+    // 直接更新
+    const updatedDay = await db.updateDay(id, validatedData);
 
-    return NextResponse.json(updatedItem);
+    return NextResponse.json(updatedDay);
   } catch (error) {
     // Zod 驗證錯誤
     if (error instanceof z.ZodError) {
@@ -46,10 +44,8 @@ export async function PATCH(
 }
 
 /**
- * DELETE /api/trips/items/[id]
- * 刪除單個 Item
- * 
- * 重構：從 30 行減少到 10 行
+ * DELETE /api/trips/days/[id]
+ * 刪除 Day（cascade delete Items，重排 day_index）
  */
 export async function DELETE(
   request: NextRequest,
@@ -58,8 +54,8 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    // 直接刪除 - O(1)!
-    await db.deleteItem(id);
+    // 直接刪除（包含 cascade delete 和 reorder）
+    await db.deleteDay(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

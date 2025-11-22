@@ -43,3 +43,114 @@ export const GetTripByIdSchema = z.object({
 });
 
 export type GetTripByIdInput = z.infer<typeof GetTripByIdSchema>;
+
+/**
+ * PATCH /api/trips/:id - 更新旅程
+ */
+export const UpdateTripSchema = z.object({
+  title: z.string().min(1).max(200).optional(),
+  start_date: z.preprocess(
+    (val) => (val === null || val === '' || val === undefined ? null : val),
+    z.coerce.date().nullable()
+  ).optional(),
+  people_count: z.number().int().min(1).max(100).nullable().optional(),
+  note: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().max(500).nullable()
+  ).optional(),
+});
+
+export type UpdateTripInput = z.infer<typeof UpdateTripSchema>;
+
+/**
+ * POST /api/trips/days/:id/items - 創建 Item
+ */
+export const CreateItemSchema = z.object({
+  type: z.enum(['flight', 'hotel', 'transfer', 'ski', 'lesson', 'todo', 'note', 'other']),
+  title: z.string().min(1, '標題不能為空').max(200, '標題過長'),
+  date: z.preprocess(
+    (val) => (val === null || val === '' || val === undefined ? null : val),
+    z.coerce.date().nullable()
+  ).optional(),
+  time: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().max(10).nullable()
+  ).optional(),
+  time_hint: z.enum(['morning', 'afternoon', 'evening', 'full_day']).nullable().optional(),
+  location: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().max(200).nullable()
+  ).optional(),
+  link: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().max(500).nullable()
+  ).optional(),
+  note: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().max(1000).nullable()
+  ).optional(),
+});
+
+export type CreateItemInput = z.infer<typeof CreateItemSchema>;
+
+/**
+ * PATCH /api/trips/items/:id - 更新 Item
+ */
+export const UpdateItemSchema = z.object({
+  type: z.enum(['flight', 'hotel', 'transfer', 'ski', 'lesson', 'todo', 'note', 'other']).optional(),
+  title: z.string().min(1, '標題不能為空').max(200, '標題過長').optional(),
+  date: z.preprocess(
+    (val) => (val === null || val === '' || val === undefined ? null : val),
+    z.coerce.date().nullable()
+  ).optional(),
+  time: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().max(10).nullable()
+  ).optional(),
+  time_hint: z.enum(['morning', 'afternoon', 'evening', 'full_day']).nullable().optional(),
+  location: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().max(200).nullable()
+  ).optional(),
+  link: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().max(500).nullable()
+  ).optional(),
+  note: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().max(1000).nullable()
+  ).optional(),
+});
+
+export type UpdateItemInput = z.infer<typeof UpdateItemSchema>;
+
+/**
+ * POST /api/trips/days - 創建 Day
+ */
+export const CreateDaySchema = z.object({
+  trip_id: z.string().min(1, 'Trip ID 不能為空'),
+  day_index: z.number().int().min(1),
+  label: z.string().min(1).max(100),
+  city: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().max(100).nullable()
+  ).optional(),
+  is_ski_day: z.boolean(),
+});
+
+export type CreateDayInput = z.infer<typeof CreateDaySchema>;
+
+/**
+ * PATCH /api/trips/days/:id - 更新 Day
+ */
+export const UpdateDaySchema = z.object({
+  day_index: z.number().int().min(1).optional(),
+  label: z.string().min(1).max(100).optional(),
+  city: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().max(100).nullable()
+  ).optional(),
+  is_ski_day: z.boolean().optional(),
+});
+
+export type UpdateDayInput = z.infer<typeof UpdateDaySchema>;

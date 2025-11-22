@@ -12,6 +12,9 @@ import { PrismaClient } from '@prisma/client';
 import { Database } from './interface';
 import {
   TripWithDetails,
+  TripData,
+  DayData,
+  ItemData,
   ChecklistItem,
   PackingItem,
 } from '@/lib/types/template';
@@ -26,6 +29,157 @@ declare global {
 const prisma = global.__prisma ?? (global.__prisma = new PrismaClient());
 
 class PrismaDB implements Database {
+  // ==================== Item Operations ====================
+
+  async createItem(dayId: string, data: Omit<ItemData, 'id' | 'day_id' | 'created_at'>): Promise<ItemData> {
+    try {
+      const item = await prisma.item.create({
+        data: {
+          day_id: dayId,
+          type: data.type,
+          title: data.title,
+          date: data.date,
+          time: data.time,
+          time_hint: data.time_hint,
+          location: data.location,
+          link: data.link,
+          note: data.note,
+        },
+      });
+      return item as ItemData;
+    } catch (error: any) {
+      // Prisma P2003: Foreign key constraint failed (Day 不存在)
+      if (error.code === 'P2003') {
+        throw new Error('Day not found');
+      }
+      throw error;
+    }
+  }
+
+  async updateItem(id: string, data: Partial<ItemData>): Promise<ItemData> {
+    try {
+      const item = await prisma.item.update({
+        where: { id },
+        data: {
+          type: data.type,
+          title: data.title,
+          date: data.date,
+          time: data.time,
+          time_hint: data.time_hint,
+          location: data.location,
+          link: data.link,
+          note: data.note,
+        },
+      });
+      return item as ItemData;
+    } catch (error: any) {
+      // Prisma P2025: Record not found
+      if (error.code === 'P2025') {
+        throw new Error('Item not found');
+      }
+      throw error;
+    }
+  }
+
+  async deleteItem(id: string): Promise<void> {
+    try {
+      await prisma.item.delete({ where: { id } });
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        throw new Error('Item not found');
+      }
+      throw error;
+    }
+  }
+
+  async getItemById(id: string): Promise<ItemData | null> {
+    const item = await prisma.item.findUnique({ where: { id } });
+    return item as ItemData | null;
+  }
+
+  // ==================== Day Operations ====================
+
+  async createDay(tripId: string, data: Omit<DayData, 'id' | 'trip_id'>): Promise<DayData> {
+    try {
+      const day = await prisma.day.create({
+        data: {
+          trip_id: tripId,
+          day_index: data.day_index,
+          label: data.label,
+          city: data.city,
+          is_ski_day: data.is_ski_day,
+        },
+      });
+      return day as DayData;
+    } catch (error: any) {
+      if (error.code === 'P2003') {
+        throw new Error('Trip not found');
+      }
+      throw error;
+    }
+  }
+
+  async updateDay(id: string, data: Partial<DayData>): Promise<DayData> {
+    try {
+      const day = await prisma.day.update({
+        where: { id },
+        data: {
+          day_index: data.day_index,
+          label: data.label,
+          city: data.city,
+          is_ski_day: data.is_ski_day,
+        },
+      });
+      return day as DayData;
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        throw new Error('Day not found');
+      }
+      throw error;
+    }
+  }
+
+  async deleteDay(id: string): Promise<void> {
+    try {
+      // 獲取 Day 信息（用於重排）
+      const day = await prisma.day.findUnique({ where: { id } });
+      if (!day) {
+        throw new Error('Day not found');
+      }
+
+      // 刪除 Day（cascade delete Items 由 Prisma schema 處理）
+      await prisma.day.delete({ where: { id } });
+
+      // 重新排序剩餘 Days 的 day_index
+      const remainingDays = await prisma.day.findMany({
+        where: { trip_id: day.trip_id },
+        orderBy: { day_index: 'asc' },
+      });
+
+      // 批量更新 day_index
+      await prisma.$transaction(
+        remainingDays.map((d, index) =>
+          prisma.day.update({
+            where: { id: d.id },
+            data: { day_index: index + 1 },
+          })
+        )
+      );
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        throw new Error('Day not found');
+      }
+      throw error;
+    }
+  }
+
+  async getDayById(id: string): Promise<DayData | null> {
+    const day = await prisma.day.findUnique({ where: { id } });
+    return day as DayData | null;
+  }
+
+  // ==================== Trip Operations ====================
+
   async createTrip(trip: TripWithDetails): Promise<TripWithDetails> {
     const created = await prisma.trip.create({
       data: {
@@ -116,39 +270,53 @@ class PrismaDB implements Database {
     return trips as TripWithDetails[];
   }
 
-  async updateTrip(id: string, data: Partial<TripWithDetails>): Promise<TripWithDetails> {
-    // Linus 原則：简单处理 - 只更新 Trip 字段，不更新嵌套结构
-    // Days/Items 有独立的 update endpoints
-    const updated = await prisma.trip.update({
-      where: { id },
-      data: {
-        title: data.title,
-        start_date: data.start_date,
-        people_count: data.people_count,
-        note: data.note,
-        updated_at: new Date(),
-      },
-      include: {
-        days: {
-          include: {
-            items: {
-              orderBy: { created_at: 'asc' },
+  async updateTrip(id: string, data: Partial<TripData>): Promise<TripWithDetails> {
+    try {
+      // Linus 原則：简单处理 - 只更新 Trip 字段，不更新嵌套结构
+      // Days/Items 有独立的 update endpoints
+      const updated = await prisma.trip.update({
+        where: { id },
+        data: {
+          title: data.title,
+          start_date: data.start_date,
+          people_count: data.people_count,
+          note: data.note,
+          updated_at: new Date(),
+        },
+        include: {
+          days: {
+            include: {
+              items: {
+                orderBy: { created_at: 'asc' },
+              },
+            },
+            orderBy: {
+              day_index: 'asc',
             },
           },
-          orderBy: {
-            day_index: 'asc',
-          },
         },
-      },
-    });
+      });
 
-    return updated as TripWithDetails;
+      return updated as TripWithDetails;
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        throw new Error('Trip not found');
+      }
+      throw error;
+    }
   }
 
   async deleteTrip(id: string): Promise<void> {
-    await prisma.trip.delete({
-      where: { id },
-    });
+    try {
+      await prisma.trip.delete({
+        where: { id },
+      });
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        throw new Error('Trip not found');
+      }
+      throw error;
+    }
   }
 
   // ==================== Checklist Operations ====================

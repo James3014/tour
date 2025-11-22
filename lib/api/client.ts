@@ -1,4 +1,4 @@
-import { TripWithDetails, ChecklistItem, PackingItem, ItemData } from '@/lib/types/template';
+import { TripWithDetails, ChecklistItem, PackingItem, ItemData, DayData } from '@/lib/types/template';
 
 const BASE_URL = '/api/trips';
 
@@ -11,11 +11,8 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
 }
 
 export const tripApi = {
+    // Trip operations
     getTrip: (id: string) => fetchJson<TripWithDetails>(`${BASE_URL}/${id}`),
-
-    getChecklist: (id: string) => fetchJson<ChecklistItem[]>(`${BASE_URL}/${id}/checklist`).catch(() => []),
-
-    getPacking: (id: string) => fetchJson<PackingItem[]>(`${BASE_URL}/${id}/packing`).catch(() => []),
 
     updateTrip: (id: string, data: Partial<TripWithDetails>) =>
         fetchJson<void>(`${BASE_URL}/${id}`, {
@@ -24,6 +21,27 @@ export const tripApi = {
             body: JSON.stringify(data),
         }),
 
+    // Day operations - NEW!
+    createDay: (tripId: string, data: Partial<DayData>) =>
+        fetchJson<DayData>('/api/trips/days', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ trip_id: tripId, ...data }),
+        }),
+
+    updateDay: (dayId: string, data: Partial<DayData>) =>
+        fetchJson<DayData>(`/api/trips/days/${dayId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        }),
+
+    deleteDay: (dayId: string) =>
+        fetchJson<void>(`/api/trips/days/${dayId}`, {
+            method: 'DELETE',
+        }),
+
+    // Item operations
     createItem: (dayId: string, data: Partial<ItemData>) =>
         fetchJson<void>(`${BASE_URL}/days/${dayId}/items`, {
             method: 'POST',
@@ -42,6 +60,11 @@ export const tripApi = {
         fetchJson<void>(`${BASE_URL}/items/${itemId}`, {
             method: 'DELETE',
         }),
+
+    // Checklist & Packing operations
+    getChecklist: (id: string) => fetchJson<ChecklistItem[]>(`${BASE_URL}/${id}/checklist`).catch(() => []),
+
+    getPacking: (id: string) => fetchJson<PackingItem[]>(`${BASE_URL}/${id}/packing`).catch(() => []),
 
     toggleChecklist: (itemId: string) =>
         fetchJson<void>(`${BASE_URL}/checklist/${itemId}`, {

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { GetTripByIdSchema } from '@/lib/validation/schemas';
-import { TripWithDetails } from '@/lib/types/template';
+import { GetTripByIdSchema, UpdateTripSchema } from '@/lib/validation/schemas';
 import { z } from 'zod';
 
 /**
@@ -43,6 +42,8 @@ export async function GET(
 /**
  * PATCH /api/trips/:id
  * 更新旅程資訊
+ * 
+ * 重構：使用 Zod 替換手動驗證
  */
 export async function PATCH(
   request: NextRequest,
@@ -52,44 +53,30 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
-    // 簡單驗證（之後可以加上 Zod）
-    if (!id) {
-      return NextResponse.json({ error: '缺少旅程 ID' }, { status: 400 });
-    }
+    // 驗證輸入
+    const validatedData = UpdateTripSchema.parse(body);
 
-    // 準備更新數據
-    const updateData: Partial<TripWithDetails> = {};
-
-    if (body.title !== undefined) {
-      updateData.title = body.title;
-    }
-
-    if (body.start_date !== undefined) {
-      // 處理日期：接受字符串、Date 對象或 null
-      if (body.start_date === null || body.start_date === '') {
-        updateData.start_date = null;
-      } else {
-        const parsedDate = new Date(body.start_date);
-        // 驗證日期是否有效
-        if (!isNaN(parsedDate.getTime())) {
-          updateData.start_date = parsedDate;
-        }
-      }
-    }
-
-    if (body.people_count !== undefined) {
-      updateData.people_count = body.people_count;
-    }
-
-    if (body.note !== undefined) {
-      updateData.note = body.note;
-    }
-
-    const updatedTrip = await db.updateTrip(id, updateData);
+    // 直接更新
+    const updatedTrip = await db.updateTrip(id, validatedData);
 
     return NextResponse.json(updatedTrip);
   } catch (error) {
-    const message = error instanceof Error ? error.message : '更新失敗';
+    // Zod 驗證錯誤
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Validation failed', details: error.issues },
+        { status: 400 }
+      );
+    }
+
+    // Not Found 錯誤
+    if (error instanceof Error && error.message.includes('not found')) {
+      return NextResponse.json({ error: error.message }, { status: 404 });
+    }
+
+    // 其他錯誤
+    console.error('Unexpected error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
@@ -105,15 +92,18 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    if (!id) {
-      return NextResponse.json({ error: '缺少旅程 ID' }, { status: 400 });
-    }
-
     await db.deleteTrip(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : '刪除失敗';
+    // Not Found 錯誤
+    if (error instanceof Error && error.message.includes('not found')) {
+      return NextResponse.json({ error: error.message }, { status: 404 });
+    }
+
+    // 其他錯誤
+    console.error('Unexpected error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
