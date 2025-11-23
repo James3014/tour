@@ -48,8 +48,8 @@ export default async function TripsPage() {
                   )}
                   <span>📝 {trip.days.length} 天</span>
                 </div>
-                {trip.notes && (
-                  <p className="text-gray-500 mt-2 line-clamp-2">{trip.notes}</p>
+                {trip.note && (
+                  <p className="text-gray-500 mt-2 line-clamp-2">{trip.note}</p>
                 )}
               </Link>
             ))}
