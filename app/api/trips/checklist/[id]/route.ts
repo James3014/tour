@@ -13,29 +13,17 @@ export async function PATCH(
   try {
     const { id } = await params;
 
-    // 1. 獲取所有 trips 並找到包含此 checklist item 的 trip
-    const allTrips = await db.getAllTrips();
-
-    let targetItem = null;
-
-    // 搜尋所有 trips 的 checklist 來找到目標 item
-    for (const trip of allTrips) {
-      const checklist = await db.getChecklistByTripId(trip.id);
-      const item = checklist.find((c) => c.id === id);
-      if (item) {
-        targetItem = item;
-        break;
-      }
-    }
+    // O(1) 直接查詢，消除 O(n) 遍歷
+    const targetItem = await db.getChecklistItemById(id);
 
     if (!targetItem) {
       return NextResponse.json({ error: '找不到 Checklist 項目' }, { status: 404 });
     }
 
-    // 2. 使用 service 切換狀態
+    // 切換狀態
     const updatedItem = toggleChecklistItem(targetItem);
 
-    // 3. 使用 database interface 更新 checklist item
+    // 更新
     await db.updateChecklistItem(id, updatedItem);
 
     return NextResponse.json(updatedItem);

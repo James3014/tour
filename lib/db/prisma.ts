@@ -349,6 +349,14 @@ class PrismaDB implements Database {
     return items as ChecklistItem[];
   }
 
+  async getChecklistItemById(id: string): Promise<ChecklistItem | null> {
+    const item = await prisma.checklistItem.findUnique({
+      where: { id },
+    });
+
+    return item as ChecklistItem | null;
+  }
+
   async updateChecklistItem(id: string, item: ChecklistItem): Promise<ChecklistItem> {
     const updated = await prisma.checklistItem.update({
       where: { id },
@@ -393,6 +401,14 @@ class PrismaDB implements Database {
     });
 
     return items as PackingItem[];
+  }
+
+  async getPackingItemById(id: string): Promise<PackingItem | null> {
+    const item = await prisma.packingItem.findUnique({
+      where: { id },
+    });
+
+    return item as PackingItem | null;
   }
 
   async updatePackingItem(id: string, item: PackingItem): Promise<PackingItem> {

@@ -38,12 +38,14 @@ export interface Database {
   // Checklist operations
   createChecklistItems(items: ChecklistItem[]): Promise<ChecklistItem[]>;
   getChecklistByTripId(tripId: string): Promise<ChecklistItem[]>;
+  getChecklistItemById(id: string): Promise<ChecklistItem | null>; // NEW: O(1) 查詢
   updateChecklistItem(id: string, item: ChecklistItem): Promise<ChecklistItem>;
   deleteChecklistItem(id: string): Promise<void>;
 
   // Packing operations
   createPackingItems(items: PackingItem[]): Promise<PackingItem[]>;
   getPackingByTripId(tripId: string): Promise<PackingItem[]>;
+  getPackingItemById(id: string): Promise<PackingItem | null>; // NEW: O(1) 查詢
   updatePackingItem(id: string, item: PackingItem): Promise<PackingItem>;
   deletePackingItem(id: string): Promise<void>;
 }

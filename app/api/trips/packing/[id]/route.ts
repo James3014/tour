@@ -13,29 +13,17 @@ export async function PATCH(
   try {
     const { id } = await params;
 
-    // 1. 獲取所有 trips 並找到包含此 packing item 的 trip
-    const allTrips = await db.getAllTrips();
-
-    let targetItem = null;
-
-    // 搜尋所有 trips 的 packing 來找到目標 item
-    for (const trip of allTrips) {
-      const packing = await db.getPackingByTripId(trip.id);
-      const item = packing.find((p) => p.id === id);
-      if (item) {
-        targetItem = item;
-        break;
-      }
-    }
+    // O(1) 直接查詢，消除 O(n) 遍歷
+    const targetItem = await db.getPackingItemById(id);
 
     if (!targetItem) {
       return NextResponse.json({ error: '找不到 Packing 項目' }, { status: 404 });
     }
 
-    // 2. 使用 service 切換狀態
+    // 切換狀態
     const updatedItem = togglePackingItem(targetItem);
 
-    // 3. 使用 database interface 更新 packing item
+    // 更新
     await db.updatePackingItem(id, updatedItem);
 
     return NextResponse.json(updatedItem);

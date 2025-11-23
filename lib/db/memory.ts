@@ -236,6 +236,10 @@ class MemoryDB implements Database {
       .sort((a, b) => a.order - b.order);
   }
 
+  async getChecklistItemById(id: string): Promise<ChecklistItem | null> {
+    return this.checklists.get(id) || null;
+  }
+
   async updateChecklistItem(id: string, item: ChecklistItem): Promise<ChecklistItem> {
     this.checklists.set(id, item);
     return item;
@@ -257,6 +261,10 @@ class MemoryDB implements Database {
     return Array.from(this.packings.values())
       .filter((item) => item.trip_id === tripId)
       .sort((a, b) => a.order - b.order);
+  }
+
+  async getPackingItemById(id: string): Promise<PackingItem | null> {
+    return this.packings.get(id) || null;
   }
 
   async updatePackingItem(id: string, item: PackingItem): Promise<PackingItem> {
