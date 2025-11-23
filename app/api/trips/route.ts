@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
     // 验证输入
     const validatedData = GetTripsSchema.parse({ user_id: userId });
 
-    const trips = await db.getAllTrips(validatedData.user_id);
+    const trips = await db.getAllTrips();
 
     return NextResponse.json(trips);
   } catch (error) {

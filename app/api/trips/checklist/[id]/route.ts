@@ -14,7 +14,7 @@ export async function PATCH(
     const { id } = await params;
 
     // 1. 獲取所有 trips 並找到包含此 checklist item 的 trip
-    const allTrips = await db.getAllTrips('');
+    const allTrips = await db.getAllTrips();
 
     let targetItem = null;
 
