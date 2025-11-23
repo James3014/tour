@@ -40,11 +40,11 @@ export default async function TripsPage() {
                   {trip.title}
                 </h2>
                 <div className="flex gap-4 text-gray-600">
-                  {trip.startDate && (
-                    <span>📅 {new Date(trip.startDate).toLocaleDateString('zh-TW')}</span>
+                  {trip.start_date && (
+                    <span>📅 {new Date(trip.start_date).toLocaleDateString('zh-TW')}</span>
                   )}
-                  {trip.participants && (
-                    <span>👥 {trip.participants} 人</span>
+                  {trip.people_count && (
+                    <span>👥 {trip.people_count} 人</span>
                   )}
                   <span>📝 {trip.days.length} 天</span>
                 </div>
