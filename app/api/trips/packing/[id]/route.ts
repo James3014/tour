@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { togglePackingItem } from '@/lib/services/checklist';
+import { handleApiError, notFound } from '@/lib/api/errors';
 
 /**
  * PATCH /api/trips/packing/[id]
@@ -13,22 +14,16 @@ export async function PATCH(
   try {
     const { id } = await params;
 
-    // O(1) 直接查詢，消除 O(n) 遍歷
+    // O(1) 直接查詢
     const targetItem = await db.getPackingItemById(id);
+    if (!targetItem) throw notFound('Packing 項目');
 
-    if (!targetItem) {
-      return NextResponse.json({ error: '找不到 Packing 項目' }, { status: 404 });
-    }
-
-    // 切換狀態
+    // 切換狀態並更新
     const updatedItem = togglePackingItem(targetItem);
-
-    // 更新
     await db.updatePackingItem(id, updatedItem);
 
     return NextResponse.json(updatedItem);
   } catch (error) {
-    const message = error instanceof Error ? error.message : '未知錯誤';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return handleApiError(error);
   }
 }

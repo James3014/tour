@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { UpdateItemSchema } from '@/lib/validation/schemas';
-import { z } from 'zod';
+import { handleApiError } from '@/lib/api/errors';
 
 /**
  * PATCH /api/trips/items/[id]
  * 更新單個 Item
- * 
- * 重構：從 50 行減少到 20 行，O(n³) → O(1)
  */
 export async function PATCH(
   request: NextRequest,
@@ -16,40 +14,18 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-
-    // 驗證輸入
     const validatedData = UpdateItemSchema.parse(body);
 
-    // 直接更新 - O(1)!
     const updatedItem = await db.updateItem(id, validatedData);
-
     return NextResponse.json(updatedItem);
   } catch (error) {
-    // Zod 驗證錯誤
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: error.issues },
-        { status: 400 }
-      );
-    }
-
-    // Not Found 錯誤
-    if (error instanceof Error && error.message.includes('not found')) {
-      return NextResponse.json({ error: error.message }, { status: 404 });
-    }
-
-    // 其他錯誤
-    console.error('Unexpected error:', error);
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
 /**
  * DELETE /api/trips/items/[id]
  * 刪除單個 Item
- * 
- * 重構：從 30 行減少到 10 行
  */
 export async function DELETE(
   request: NextRequest,
@@ -57,20 +33,9 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-
-    // 直接刪除 - O(1)!
     await db.deleteItem(id);
-
     return NextResponse.json({ success: true });
   } catch (error) {
-    // Not Found 錯誤
-    if (error instanceof Error && error.message.includes('not found')) {
-      return NextResponse.json({ error: error.message }, { status: 404 });
-    }
-
-    // 其他錯誤
-    console.error('Unexpected error:', error);
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return handleApiError(error);
   }
 }
