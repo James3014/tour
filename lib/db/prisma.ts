@@ -249,9 +249,8 @@ class PrismaDB implements Database {
     return trip as TripWithDetails | null;
   }
 
-  async getAllTrips(userId: string): Promise<TripWithDetails[]> {
+  async getAllTrips(): Promise<TripWithDetails[]> {
     const trips = await prisma.trip.findMany({
-      where: { user_id: userId },
       include: {
         days: {
           include: {

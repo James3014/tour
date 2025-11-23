@@ -10,12 +10,20 @@ export default function Home() {
         <p className="text-xl text-gray-600 mb-8">
           用模板快速規劃你的滑雪旅程
         </p>
-        <Link
-          href="/templates"
-          className="inline-block bg-blue-600 text-white text-lg px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
-        >
-          開始規劃 →
-        </Link>
+        <div className="flex gap-4 justify-center">
+          <Link
+            href="/templates"
+            className="inline-block bg-blue-600 text-white text-lg px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
+          >
+            開始規劃 →
+          </Link>
+          <Link
+            href="/trips"
+            className="inline-block bg-white text-blue-600 text-lg px-8 py-4 rounded-lg font-semibold hover:bg-gray-50 transition-colors shadow-lg border-2 border-blue-600"
+          >
+            我的行程
+          </Link>
+        </div>
         <p className="mt-6 text-sm text-gray-500">
           MVP 版本 ・ TDD 開發 ・ Linus 風格
         </p>

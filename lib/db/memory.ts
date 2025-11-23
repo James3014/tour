@@ -170,8 +170,8 @@ class MemoryDB implements Database {
     };
   }
 
-  async getAllTrips(userId: string): Promise<TripWithDetails[]> {
-    const trips = Array.from(this.trips.values()).filter((t) => t.user_id === userId);
+  async getAllTrips(): Promise<TripWithDetails[]> {
+    const trips = Array.from(this.trips.values());
     
     // 為每個 Trip 組裝完整結構
     return Promise.all(trips.map(trip => this.getTripById(trip.id) as Promise<TripWithDetails>));
