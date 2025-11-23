@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { togglePackingItem } from '@/lib/services/checklist';
-import { handleApiError, notFound } from '@/lib/api/errors';
+import { handleToggleItem } from '@/lib/api/toggle-item';
 
 /**
  * PATCH /api/trips/packing/[id]
@@ -11,19 +11,10 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const { id } = await params;
-
-    // O(1) 直接查詢
-    const targetItem = await db.getPackingItemById(id);
-    if (!targetItem) throw notFound('Packing 項目');
-
-    // 切換狀態並更新
-    const updatedItem = togglePackingItem(targetItem);
-    await db.updatePackingItem(id, updatedItem);
-
-    return NextResponse.json(updatedItem);
-  } catch (error) {
-    return handleApiError(error);
-  }
+  return handleToggleItem(request, params, {
+    getItemById: db.getPackingItemById.bind(db),
+    updateItem: db.updatePackingItem.bind(db),
+    toggleFn: togglePackingItem,
+    resourceName: 'Packing 項目',
+  });
 }
