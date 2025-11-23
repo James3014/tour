@@ -170,8 +170,16 @@ class MemoryDB implements Database {
     };
   }
 
-  async getAllTrips(): Promise<TripWithDetails[]> {
-    const trips = Array.from(this.trips.values());
+  async getAllTrips(options?: { limit?: number; offset?: number }): Promise<TripWithDetails[]> {
+    let trips = Array.from(this.trips.values());
+    
+    // 分頁
+    if (options?.offset) {
+      trips = trips.slice(options.offset);
+    }
+    if (options?.limit) {
+      trips = trips.slice(0, options.limit);
+    }
     
     // 為每個 Trip 組裝完整結構
     return Promise.all(trips.map(trip => this.getTripById(trip.id) as Promise<TripWithDetails>));

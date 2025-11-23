@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { db } from '@/lib/db';
 
 export default async function TripsPage() {
-  const trips = await db.getAllTrips();
+  // 預設顯示最新 20 筆
+  const trips = await db.getAllTrips({ limit: 20 });
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">

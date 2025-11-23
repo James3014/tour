@@ -19,7 +19,7 @@ export interface Database {
   // Trip operations
   createTrip(trip: TripWithDetails): Promise<TripWithDetails>;
   getTripById(id: string): Promise<TripWithDetails | null>;
-  getAllTrips(): Promise<TripWithDetails[]>;
+  getAllTrips(options?: { limit?: number; offset?: number }): Promise<TripWithDetails[]>;
   updateTrip(id: string, data: Partial<TripData>): Promise<TripWithDetails>;
   deleteTrip(id: string): Promise<void>;
 

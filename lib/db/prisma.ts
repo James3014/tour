@@ -249,8 +249,10 @@ class PrismaDB implements Database {
     return trip as TripWithDetails | null;
   }
 
-  async getAllTrips(): Promise<TripWithDetails[]> {
+  async getAllTrips(options?: { limit?: number; offset?: number }): Promise<TripWithDetails[]> {
     const trips = await prisma.trip.findMany({
+      take: options?.limit,
+      skip: options?.offset,
       include: {
         days: {
           include: {
