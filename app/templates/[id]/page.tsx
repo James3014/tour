@@ -97,10 +97,10 @@ export default function TemplateDetailPage() {
               {template.day_templates.map((day) => (
                 <div
                   key={day.day_index}
-                  className="flex flex-col items-center p-3 bg-white rounded-lg border border-gray-200"
+                  className="flex flex-col items-center p-3 bg-white rounded-lg border border-gray-200 gap-0.5"
                 >
-                  <div className="text-2xl mb-1">
-                    {day.is_ski_day ? '⛷️' : day.day_index === 1 ? '✈️' : '🏙️'}
+                  <div className="text-2xl leading-none">
+                    {day.is_ski_day ? '⛷️' : day.day_index === 1 || day.day_index === template.default_days ? '✈️' : '🏙️'}
                   </div>
                   <div className="text-xs text-gray-500">D{day.day_index}</div>
                   <div className="text-xs text-gray-700 text-center mt-1 max-w-[60px]">
