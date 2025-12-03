@@ -120,81 +120,79 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
     };
 
     return (
-        <div className={`border rounded-lg p-4 ${mode === 'edit' ? 'border-blue-500 bg-blue-50' : 'border-green-500 bg-green-50'}`}>
-            <h4 className="font-bold mb-3">{mode === 'edit' ? '編輯項目' : '新增項目'}</h4>
+        <div className={`border rounded-lg p-3 sm:p-4 ${mode === 'edit' ? 'border-emerald-500/50 bg-emerald-500/10' : 'border-teal-500/50 bg-teal-500/10'}`}>
+            <h4 className="font-bold text-white mb-3 text-sm sm:text-base">{mode === 'edit' ? '✏️ 編輯項目' : '➕ 新增項目'}</h4>
             <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-xs sm:text-sm font-bold text-emerald-400 mb-1">
                             類型
                         </label>
                         <select
                             value={formData.type || 'other'}
                             onChange={(e) => handleChange('type', e.target.value as ItemType)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                            className="w-full px-3 py-2 bg-zinc-900 border border-emerald-500/30 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500 transition-colors"
                         >
                             {Object.entries(ITEM_TYPE_LABELS).map(([value, label]) => (
-                                <option key={value} value={value}>{label}</option>
+                                <option key={value} value={value} className="bg-zinc-900">{label}</option>
                             ))}
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-xs sm:text-sm font-bold text-emerald-400 mb-1">
                             時段
                         </label>
                         <select
                             value={formData.time_hint || ''}
                             onChange={(e) => handleChange('time_hint', e.target.value as TimeHint)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                            className="w-full px-3 py-2 bg-zinc-900 border border-emerald-500/30 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500 transition-colors"
                         >
-                            <option value="">不指定</option>
+                            <option value="" className="bg-zinc-900">全天</option>
                             {Object.entries(TIME_HINT_LABELS).map(([value, label]) => (
-                                <option key={value} value={value}>{label}</option>
+                                <option key={value} value={value} className="bg-zinc-900">{label}</option>
                             ))}
                         </select>
                     </div>
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-xs sm:text-sm font-bold text-emerald-400 mb-1">
                         標題 *
                     </label>
                     <input
                         type="text"
                         value={formData.title || ''}
                         onChange={(e) => handleChange('title', e.target.value)}
-                        className={`w-full px-3 py-2 border rounded-lg ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
+                        className={`w-full px-3 py-2 bg-zinc-900 border rounded-lg text-white text-sm focus:outline-none transition-colors ${errors.title ? 'border-red-500 focus:border-red-500' : 'border-emerald-500/30 focus:border-emerald-500'}`}
                         placeholder={mode === 'add' ? "例如：去程航班" : ""}
                         autoFocus={mode === 'add'}
                     />
-                    {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+                    {errors.title && <p className="text-red-400 text-xs mt-1">{errors.title}</p>}
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            具體時間
-                        </label>
-                        <input
-                            type="time"
-                            value={formData.time || ''}
-                            onChange={(e) => handleChange('time', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        />
-                    </div>
+                <div>
+                    <label className="block text-xs sm:text-sm font-bold text-emerald-400 mb-1">
+                        具體時間
+                    </label>
+                    <input
+                        type="time"
+                        value={formData.time || ''}
+                        onChange={(e) => handleChange('time', e.target.value)}
+                        className="w-full px-3 py-2 bg-zinc-900 border border-emerald-500/30 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500 transition-colors"
+                    />
                 </div>
 
                 {!showMore ? (
                     <button
                         onClick={() => setShowMore(true)}
-                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                        className="text-xs sm:text-sm text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition-colors"
                     >
                         <span>+ 顯示更多選項 (雪場、地點、連結、備註)</span>
                     </button>
                 ) : (
-                    <div className="space-y-3 border-t pt-3 mt-2">
+                    <div className="space-y-3 border-t border-emerald-500/20 pt-3 mt-2">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-xs sm:text-sm font-bold text-emerald-400 mb-1">
                                 指定雪場
                             </label>
                             <ResortSearchInput
@@ -203,48 +201,48 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
                                 placeholder="輸入雪場名稱或地區"
                             />
                             {selectedResort && (
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-zinc-500 mt-1">
                                     已選：{selectedResort.name}（{selectedResort.region}）
                                 </p>
                             )}
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-xs sm:text-sm font-bold text-emerald-400 mb-1">
                                 地點
                             </label>
                             <input
                                 type="text"
                                 value={formData.location || ''}
                                 onChange={(e) => handleChange('location', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                className="w-full px-3 py-2 bg-zinc-900 border border-emerald-500/30 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500 transition-colors"
                                 placeholder="例如：新千歲機場"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-xs sm:text-sm font-bold text-emerald-400 mb-1">
                                 相關連結
                             </label>
                             <input
                                 type="text"
                                 value={formData.link || ''}
                                 onChange={(e) => handleChange('link', e.target.value)}
-                                className={`w-full px-3 py-2 border rounded-lg ${errors.link ? 'border-red-500' : 'border-gray-300'}`}
+                                className={`w-full px-3 py-2 bg-zinc-900 border rounded-lg text-white text-sm focus:outline-none transition-colors ${errors.link ? 'border-red-500 focus:border-red-500' : 'border-emerald-500/30 focus:border-emerald-500'}`}
                                 placeholder="例如：訂單連結、Google Maps"
                             />
-                            {errors.link && <p className="text-red-500 text-xs mt-1">{errors.link}</p>}
+                            {errors.link && <p className="text-red-400 text-xs mt-1">{errors.link}</p>}
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-xs sm:text-sm font-bold text-emerald-400 mb-1">
                                 備註
                             </label>
                             <textarea
                                 value={formData.note || ''}
                                 onChange={(e) => handleChange('note', e.target.value)}
                                 rows={3}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                className="w-full px-3 py-2 bg-zinc-900 border border-emerald-500/30 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500 transition-colors resize-none"
                                 placeholder="其他需要記錄的資訊"
                             />
                         </div>
@@ -255,17 +253,16 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
                     <button
                         onClick={onCancel}
                         disabled={saving}
-                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
+                        className="px-3 sm:px-4 py-2 bg-zinc-800 text-zinc-300 rounded-lg hover:bg-zinc-700 transition-colors disabled:opacity-50 text-sm font-bold"
                     >
                         取消
                     </button>
                     <button
                         onClick={handleSubmit}
                         disabled={saving}
-                        className={`px-4 py-2 text-white rounded-lg transition-colors disabled:opacity-50 ${mode === 'edit' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'
-                            }`}
+                        className="btn-tour-primary text-sm px-3 sm:px-4 disabled:opacity-50"
                     >
-                        {saving ? (mode === 'edit' ? '儲存中...' : '新增中...') : (mode === 'edit' ? '儲存' : '新增')}
+                        {saving ? (mode === 'edit' ? '儲存中...' : '新增中...') : (mode === 'edit' ? '💾 儲存' : '➕ 新增')}
                     </button>
                 </div>
             </div>

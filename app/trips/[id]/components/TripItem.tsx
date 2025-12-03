@@ -52,73 +52,91 @@ export default function TripItem({ item, onUpdate, onDelete }: TripItemProps) {
     }
 
     return (
-        <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors group bg-white">
+        <div className="relative bg-zinc-900/50 border border-emerald-500/20 rounded-lg p-3 sm:p-4 hover:bg-zinc-900/70 hover:border-emerald-500/40 transition-all group">
             <div className="flex items-start gap-3">
-                <span className="text-2xl">
+                {/* Icon with gradient background */}
+                <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-lg flex items-center justify-center text-xl sm:text-2xl border border-emerald-500/30">
                     {ITEM_TYPE_LABELS[item.type]?.split(' ')[0] || '📌'}
-                </span>
-                <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold">{item.title}</h3>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                    {/* Title row with badges */}
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <h3 className="font-bold text-white text-sm sm:text-base">{item.title}</h3>
                         {item.time && (
-                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                                🕐 {item.time}
-                            </span>
+                            <div className="tour-badge badge-emerald">
+                                <span className="tour-badge-inner text-xs">🕐 {item.time}</span>
+                            </div>
                         )}
                         {item.time_hint && !item.time && (
-                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                                {TIME_HINT_LABELS[item.time_hint]}
-                            </span>
+                            <div className="tour-badge badge-teal">
+                                <span className="tour-badge-inner text-xs">{TIME_HINT_LABELS[item.time_hint]}</span>
+                            </div>
                         )}
                     </div>
+
+                    {/* Location */}
                     {item.location && (
-                        <p className="text-sm text-gray-600 mb-1">
-                            📍 {item.location}
+                        <p className="text-xs sm:text-sm text-zinc-400 mb-1 flex items-center gap-1">
+                            <span>📍</span>
+                            <span>{item.location}</span>
                         </p>
                     )}
+
+                    {/* Link */}
                     {item.link && (
                         <a
                             href={item.link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm text-blue-600 hover:underline inline-block mb-1"
+                            className="text-xs sm:text-sm text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1 mb-1"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            🔗 相關連結
+                            <span>🔗</span>
+                            <span>相關連結</span>
                         </a>
                     )}
+
+                    {/* Note */}
                     {item.note && (
-                        <p className="text-sm text-gray-500 mt-2 bg-gray-50 p-2 rounded">
+                        <p className="text-xs sm:text-sm text-zinc-500 mt-2 bg-zinc-800/50 p-2 rounded border border-zinc-700/50 leading-relaxed">
                             {item.note}
                         </p>
                     )}
+
+                    {/* Resort info */}
                     {item.resort_name && (
-                        <div className="mt-3 rounded-lg border border-purple-100 bg-purple-50 p-3 text-xs text-purple-900">
-                            <p className="font-semibold">
+                        <div className="mt-2 sm:mt-3 rounded-lg border border-purple-500/30 bg-purple-500/10 p-2 sm:p-3 text-xs">
+                            <p className="font-bold text-purple-300">
                                 🏔️ {item.resort_name}
                                 {item.region ? ` · ${item.region}` : ''}
                             </p>
-                            <p className="mt-1">
+                            <p className="mt-1 text-purple-400/80 leading-relaxed">
                                 {describeResortHighlight(item.region)}
                             </p>
                         </div>
                     )}
                 </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+
+                {/* Action buttons */}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1 shrink-0">
                     <button
                         onClick={() => setIsEditing(true)}
-                        className="text-sm text-blue-600 hover:bg-blue-50 px-2 py-1 rounded"
+                        className="text-xs sm:text-sm text-emerald-400 hover:bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/30 hover:border-emerald-500/50 transition-colors"
                     >
                         編輯
                     </button>
                     <button
                         onClick={handleDelete}
-                        className="text-sm text-red-600 hover:bg-red-50 px-2 py-1 rounded"
+                        className="text-xs sm:text-sm text-red-400 hover:bg-red-500/10 px-2 py-1 rounded border border-red-500/30 hover:border-red-500/50 transition-colors"
                     >
                         刪除
                     </button>
                 </div>
             </div>
+
+            {/* Bottom shine */}
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent"></div>
         </div>
     );
 }
