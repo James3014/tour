@@ -1,4 +1,5 @@
 import { ChecklistTemplate, ChecklistTemplateItem } from '@/lib/types/template';
+import { defineChecklist } from '../schema';
 
 /**
  * 北海道 8 日豪華版滑雪行前檢查清單
@@ -8,7 +9,7 @@ import { ChecklistTemplate, ChecklistTemplateItem } from '@/lib/types/template';
  * - 涵蓋二世古 + 富良野雙雪場
  * - 自駕為主，需要更多交通規劃
  */
-export const HOKKAIDO_8D_DELUXE_CHECKLIST: ChecklistTemplate = {
+export const HOKKAIDO_8D_DELUXE_CHECKLIST: ChecklistTemplate = defineChecklist({
   template_id: 'jp_hokkaido_8d5s_deluxe_v1',
   items: [
     // 訂購前確認
@@ -137,4 +138,4 @@ export const HOKKAIDO_8D_DELUXE_CHECKLIST: ChecklistTemplate = {
       order: 26,
     },
   ],
-};
+});

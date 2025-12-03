@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { ResortSummary } from '@/lib/types/resort';
+import { useResortSearch } from '@/hooks/useResortSearch';
 
 interface ResortSearchInputProps {
   value?: ResortSummary | null;
@@ -17,47 +18,27 @@ export default function ResortSearchInput({
   allowClear = true,
 }: ResortSearchInputProps) {
   const [query, setQuery] = useState(value?.name ?? '');
-  const [results, setResults] = useState<ResortSummary[]>([]);
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { results, loading, prefetched, search, prefetchPopular, resetResults } = useResortSearch();
 
   useEffect(() => {
     setQuery(value?.name ?? '');
   }, [value?.resort_id]);
 
   useEffect(() => {
-    if (!open) return;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      fetchResorts(query, controller.signal);
-    }, 250);
+    prefetchPopular();
+  }, [prefetchPopular]);
 
-    return () => {
-      clearTimeout(timeoutId);
-      controller.abort();
-    };
-  }, [query, open]);
-
-  const fetchResorts = async (keyword: string, signal?: AbortSignal) => {
-    setLoading(true);
-    try {
-      const url = new URL('/api/resorts', window.location.origin);
-      if (keyword) {
-        url.searchParams.set('q', keyword);
-      }
-      const res = await fetch(url.toString(), { signal });
-      if (!res.ok) throw new Error('failed');
-      const data = await res.json();
-      setResults(data);
-    } catch (error) {
-      if ((error as Error).name !== 'AbortError') {
-        console.error('Failed to search resorts', error);
-        setResults([]);
-      }
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (!open) {
+      resetResults();
+      return;
     }
-  };
+    const timeoutId = setTimeout(() => {
+      search(query.trim());
+    }, 250);
+    return () => clearTimeout(timeoutId);
+  }, [open, query, search, resetResults]);
 
   const handleSelect = (option: ResortSummary | null) => {
     onSelect(option);
@@ -69,7 +50,7 @@ export default function ResortSearchInput({
 
   return (
     <div className="relative">
-      <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 bg-white">
+      <div className="flex items-center border border-gray-300 rounded-lg px-3 py-2 bg-white gap-2">
         <input
           type="text"
           value={query}
@@ -81,6 +62,16 @@ export default function ResortSearchInput({
           onFocus={() => setOpen(true)}
           className="flex-1 outline-none bg-transparent text-sm"
         />
+        <button
+          type="button"
+          aria-label="展開雪場清單"
+          onClick={() => setOpen((prev) => !prev)}
+          className="text-gray-500 hover:text-blue-600 transition-colors text-xs"
+        >
+          <span className={`inline-block transition-transform ${open ? 'rotate-180' : ''}`}>
+            ▾
+          </span>
+        </button>
         {allowClear && value && (
           <button
             type="button"
@@ -99,23 +90,28 @@ export default function ResortSearchInput({
           ) : results.length === 0 ? (
             <p className="text-sm text-gray-500 p-3">找不到符合的雪場</p>
           ) : (
-            results.map((option) => (
-              <button
-                key={option.resort_id}
-                onClick={() => handleSelect(option)}
-                className="flex flex-col w-full text-left px-4 py-2 hover:bg-blue-50"
-              >
-                <span className="font-semibold text-sm">{option.name}</span>
-                <span className="text-xs text-gray-500">
-                  {option.region} · {option.country_code}
-                </span>
-                {option.tagline && (
-                  <span className="text-xs text-gray-400 mt-1">
-                    {option.tagline}
+            <>
+              {query.trim() === '' && prefetched.length > 0 && (
+                <p className="px-4 pt-3 pb-1 text-xs text-gray-400">熱門雪場（可直接選擇）</p>
+              )}
+              {results.map((option) => (
+                <button
+                  key={option.resort_id}
+                  onClick={() => handleSelect(option)}
+                  className="flex flex-col w-full text-left px-4 py-2 hover:bg-blue-50"
+                >
+                  <span className="font-semibold text-sm">{option.name}</span>
+                  <span className="text-xs text-gray-500">
+                    {option.region} · {option.country_code}
                   </span>
-                )}
-              </button>
-            ))
+                  {option.tagline && (
+                    <span className="text-xs text-gray-400 mt-1">
+                      {option.tagline}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </>
           )}
         </div>
       )}

@@ -1,11 +1,12 @@
 import { Template } from '@/lib/types/template';
+import { defineTemplate } from './schema';
 
 /**
  * 北海道 6 日・3 天滑雪 + 1 天市區
  *
  * 目標族群：初學～中階、朋友/家庭小團
  */
-export const HOKKAIDO_6D_TEMPLATE: Template = {
+export const HOKKAIDO_6D_TEMPLATE: Template = defineTemplate({
   template_id: 'jp_hokkaido_6d3s1c_v1',
   name: '北海道 6 日・3 天滑雪 + 1 天市區',
   region: 'Japan / Hokkaido',
@@ -200,4 +201,4 @@ export const HOKKAIDO_6D_TEMPLATE: Template = {
       ],
     },
   ],
-};
+});

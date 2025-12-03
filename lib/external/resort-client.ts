@@ -3,6 +3,7 @@ import { promises as fs } from 'fs';
 import type { Dirent } from 'fs';
 import yaml from 'js-yaml';
 import type { ResortSummary } from '@/lib/types/resort';
+import embeddedResorts from '@/lib/data/resorts.generated.json';
 
 export type ResortMetadata = ResortSummary;
 
@@ -138,6 +139,12 @@ class ResortClient {
     }
 
     await walk(dataDir);
+    if (dataset.size === 0) {
+      (embeddedResorts as ResortMetadata[]).forEach((resort) => {
+        dataset.set(resort.resort_id, resort);
+      });
+    }
+
     this.localDataset = dataset;
     return dataset;
   }

@@ -4,27 +4,23 @@ import { TOHOKU_5D_TEMPLATE } from './tohoku-5d';
 import { NAGANO_5D_TEMPLATE } from './nagano-5d';
 import { NIIGATA_4D_TEMPLATE } from './niigata-4d';
 import { HOKKAIDO_8D_DELUXE_TEMPLATE } from './hokkaido-8d-deluxe';
-import { KOREA_4D_TEMPLATE } from './korea-4d';
 
 /**
  * 所有可用模板
  *
- * MVP: 精選 3 個核心模板（避免選擇困難）
- * - 北海道 6 日：最經典，適合初次滑雪
- * - 韓國 4 日：預算友好，離台灣近
+ * 精選 5 套對應真實雪場資料的行程：
+ * - 北海道 6 日：經典入門
  * - 北海道 8 日豪華：進階玩家
- *
- * 未來擴展：移到資料庫 + 後台管理
+ * - 長野 5 日：白馬多雪場
+ * - 新潟 4 日：苗場/田代週末快閃
+ * - 東北 5 日：安比 + 藏王樹冰
  */
 export const SKI_TEMPLATES: Template[] = [
-  HOKKAIDO_6D_TEMPLATE,      // 核心 1: 最經典
-  KOREA_4D_TEMPLATE,          // 核心 2: 預算友好
-  HOKKAIDO_8D_DELUXE_TEMPLATE, // 核心 3: 進階選項
-
-  // MVP 階段暫時隱藏（避免選擇困難，確保品質）
-  // TOHOKU_5D_TEMPLATE,
-  // NAGANO_5D_TEMPLATE,
-  // NIIGATA_4D_TEMPLATE,
+  HOKKAIDO_6D_TEMPLATE,
+  HOKKAIDO_8D_DELUXE_TEMPLATE,
+  NAGANO_5D_TEMPLATE,
+  NIIGATA_4D_TEMPLATE,
+  TOHOKU_5D_TEMPLATE,
 ];
 
 /**

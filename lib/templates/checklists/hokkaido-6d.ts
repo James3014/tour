@@ -1,4 +1,5 @@
 import { ChecklistTemplate, ChecklistTemplateItem } from '@/lib/types/template';
+import { defineChecklist } from '../schema';
 
 /**
  * 北海道 6 日滑雪行前檢查清單
@@ -8,7 +9,7 @@ import { ChecklistTemplate, ChecklistTemplateItem } from '@/lib/types/template';
  * - 實用為主，避免過度細節
  * - 適合初次滑雪的人
  */
-export const HOKKAIDO_6D_CHECKLIST: ChecklistTemplate = {
+export const HOKKAIDO_6D_CHECKLIST: ChecklistTemplate = defineChecklist({
   template_id: 'jp_hokkaido_6d3s1c_v1',
   items: [
     // 訂購前確認
@@ -112,4 +113,4 @@ export const HOKKAIDO_6D_CHECKLIST: ChecklistTemplate = {
       order: 25,
     },
   ],
-};
+});

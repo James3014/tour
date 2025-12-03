@@ -11,7 +11,10 @@
     "test:watch": "jest --watch",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:generate": "prisma generate"
+    "db:generate": "prisma generate",
+    "resorts:generate": "node scripts/generate-resorts-json.js",
+    "templates:validate": "node scripts/validate-templates.js",
+    "check:env": "node scripts/check-env.js"
   },
   "dependencies": {
     "@prisma/client": "^6.0.0",

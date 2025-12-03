@@ -11,10 +11,12 @@ MVP 版本 - 基於模板的滑雪旅程規劃工具
 ### 已實現（完整功能）
 
 #### 1. 模板系統 ✅
-- **3 個精選滑雪模板** (MVP 階段)
+- **5 個對應實際雪場的模板**
   - 北海道 6 日（3 滑 1 市區）：經典入門
-  - 韓國 4 日（龍平滑雪）：預算友好
-  - 北海道 8 日豪華版（二世古 + 富良野）：進階玩家
+  - 北海道 8 日豪華版（二世谷 + 富良野）：進階玩家
+  - 長野 5 日（白馬多雪場）：粉雪 & 多樣地形
+  - 新潟 4 日（苗場／田代）：週末快閃、交通最方便
+  - 東北 5 日（安比 + 藏王）：樹冰 + 粉雪 + 溫泉療癒
 
 #### 2. 旅程管理（Flow 1 & 2）✅
 - **旅程創建**（Flow 1）
@@ -54,6 +56,33 @@ MVP 版本 - 基於模板的滑雪旅程規劃工具
 - **樂觀更新 (Optimistic Updates)**：所有操作（新增、修改、刪除、勾選）皆為即時響應，提供原生 App 般的流暢體驗。
 - **骨架屏 (Skeleton Loading)**：資料載入時顯示優雅的骨架屏，提升感知效能。
 - **錯誤回滾**：若伺服器請求失敗，UI 會自動回滾至先前狀態，確保資料一致性。
+
+## 🗂️ 雪場資料維護
+
+- Trip Planner 會優先讀取 `RESORT_API_BASE_URL` 指向的 `resort_api`，若環境缺此服務才會 fallback 至 `lib/data/resorts.generated.json`。
+- 若更新 `specs/resort-services/data` 下的 YAML，請執行：
+
+```bash
+npm run resorts:generate
+```
+
+- Commit 時務必包含新的 `lib/data/resorts.generated.json`，並在 README/部署說明提醒這只是最終保險來源。
+
+## 🧱 模板資料驗證
+
+- 所有模板/Checklist/Packing 在編譯階段會透過 `lib/templates/schema.ts`（Zod）驗證欄位。
+- 新增或修改模板後請執行：
+
+```bash
+npm run templates:validate
+```
+
+- 此命令會檢查每個 template 是否具備對應的 Checklist/Packing，避免遺漏。
+
+## 🔐 部署前環境檢查
+
+- 提供 `npm run check:env` 檢查 `RESORT_API_BASE_URL`、`USER_CORE_API_URL` 是否設定。
+- CI/CD 或 Zeabur 部署腳本可在 build 前執行一次，以避免缺少必要服務端點。
 
 ## 🏗️ 技術架構
 

@@ -26,16 +26,16 @@ describe('createTripFromTemplate', () => {
       expect(result.days).toHaveLength(6);
     });
 
-    it('應該從韓國模板創建 4 天的 Trip', () => {
+    it('應該從長野模板創建 5 天的 Trip', () => {
       const input = {
-        template_id: 'kr_yongpyong_4d2s_v1',
+        template_id: 'jp_nagano_5d3s_v1',
         user_id: 'test_user_456',
       };
 
       const result = createTripFromTemplate(input);
 
-      expect(result.template_id).toBe('kr_yongpyong_4d2s_v1');
-      expect(result.days).toHaveLength(4);
+      expect(result.template_id).toBe('jp_nagano_5d3s_v1');
+      expect(result.days).toHaveLength(5);
     });
 
     it('應該允許自定義標題', () => {

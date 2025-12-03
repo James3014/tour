@@ -1,4 +1,5 @@
 import { PackingTemplate, PackingTemplateItem } from '@/lib/types/template';
+import { definePacking } from '../schema';
 
 /**
  * 北海道 6 日滑雪打包清單
@@ -8,7 +9,7 @@ import { PackingTemplate, PackingTemplateItem } from '@/lib/types/template';
  * - 初學者友善，不假設有自己的雪具
  * - 北海道極寒，強調保暖
  */
-export const HOKKAIDO_6D_PACKING: PackingTemplate = {
+export const HOKKAIDO_6D_PACKING: PackingTemplate = definePacking({
   template_id: 'jp_hokkaido_6d3s1c_v1',
   items: [
     // 服裝防寒
@@ -194,4 +195,4 @@ export const HOKKAIDO_6D_PACKING: PackingTemplate = {
       order: 47,
     },
   ],
-};
+});

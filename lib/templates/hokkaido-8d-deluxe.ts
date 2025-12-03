@@ -1,9 +1,10 @@
 import { Template } from '@/lib/types/template';
+import { defineTemplate } from './schema';
 
 /**
  * 北海道 8 日豪華版・5 天滑雪（二世古 + 富良野）
  */
-export const HOKKAIDO_8D_DELUXE_TEMPLATE: Template = {
+export const HOKKAIDO_8D_DELUXE_TEMPLATE: Template = defineTemplate({
   template_id: 'jp_hokkaido_8d5s_deluxe_v1',
   name: '北海道 8 日豪華版・二世古 + 富良野',
   region: 'Japan / Hokkaido',
@@ -182,4 +183,4 @@ export const HOKKAIDO_8D_DELUXE_TEMPLATE: Template = {
       ],
     },
   ],
-};
+});

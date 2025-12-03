@@ -114,4 +114,9 @@ npx prisma migrate reset
 
 # 查看当前数据库状态
 npx prisma studio
+
+## 雪场资料对齐
+
+- Resort metadata 来源位于 `specs/resort-services/data/*.yaml`，Trip Planner 部署时会优先呼叫 `RESORT_API_BASE_URL` 指向的 resort_api，只有在 API 不可用时才会 fallback 到 `lib/data/resorts.generated.json`。
+- 调整 YAML 后请执行 `npm run resorts:generate` 更新 fallback JSON，并把新的 `lib/data/resorts.generated.json` 一起提交，确保 Prisma 验证与前端 UI 都能读取最新雪场清单。
 ```

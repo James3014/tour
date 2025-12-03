@@ -1,4 +1,5 @@
 import { PackingTemplate, PackingTemplateItem } from '@/lib/types/template';
+import { definePacking } from '../schema';
 
 /**
  * 北海道 8 日豪華版滑雪打包清單
@@ -8,7 +9,7 @@ import { PackingTemplate, PackingTemplateItem } from '@/lib/types/template';
  * - 8 天較長行程，需要更多換洗衣物
  * - 自駕行程，可以多帶一些裝備
  */
-export const HOKKAIDO_8D_DELUXE_PACKING: PackingTemplate = {
+export const HOKKAIDO_8D_DELUXE_PACKING: PackingTemplate = definePacking({
   template_id: 'jp_hokkaido_8d5s_deluxe_v1',
   items: [
     // 服裝防寒
@@ -229,4 +230,4 @@ export const HOKKAIDO_8D_DELUXE_PACKING: PackingTemplate = {
       order: 55,
     },
   ],
-};
+});
