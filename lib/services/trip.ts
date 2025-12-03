@@ -79,6 +79,9 @@ export function createTripFromTemplate(
       label: dayTemplate.label,
       city: dayTemplate.default_city || null,
       is_ski_day: dayTemplate.is_ski_day,
+      resort_id: dayTemplate.default_resort_id ?? null,
+      resort_name: null,
+      region: null,
       items: [],
     };
 
@@ -96,6 +99,9 @@ export function createTripFromTemplate(
         link: null,                               // 相關連結（待用戶填寫）
         note: itemTemplate.note_default || null,
         created_at: new Date(),
+        resort_id: itemTemplate.resort_id ?? null,
+        resort_name: null,
+        region: null,
       };
 
       return item;

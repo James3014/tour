@@ -89,6 +89,10 @@ export const CreateItemSchema = z.object({
     (val) => (val === '' ? null : val),
     z.string().max(1000).nullable()
   ).optional(),
+  resort_id: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().min(1).max(100).nullable()
+  ).optional(),
 });
 
 export type CreateItemInput = z.infer<typeof CreateItemSchema>;
@@ -120,6 +124,10 @@ export const UpdateItemSchema = z.object({
     (val) => (val === '' ? null : val),
     z.string().max(1000).nullable()
   ).optional(),
+  resort_id: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().min(1).max(100).nullable()
+  ).optional(),
 });
 
 export type UpdateItemInput = z.infer<typeof UpdateItemSchema>;
@@ -136,6 +144,10 @@ export const CreateDaySchema = z.object({
     z.string().max(100).nullable()
   ).optional(),
   is_ski_day: z.boolean(),
+  resort_id: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().min(1).max(100).nullable()
+  ).optional(),
 });
 
 export type CreateDayInput = z.infer<typeof CreateDaySchema>;
@@ -151,6 +163,10 @@ export const UpdateDaySchema = z.object({
     z.string().max(100).nullable()
   ).optional(),
   is_ski_day: z.boolean().optional(),
+  resort_id: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().min(1).max(100).nullable()
+  ).optional(),
 });
 
 export type UpdateDayInput = z.infer<typeof UpdateDaySchema>;

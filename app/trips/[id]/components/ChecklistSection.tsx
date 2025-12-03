@@ -1,8 +1,9 @@
-import { ChecklistItem, ChecklistCategory } from '@/lib/types/template';
+import { ChecklistItem } from '@/lib/types/template';
 
 interface ChecklistSectionProps {
     checklist: ChecklistItem[];
     onToggle: (itemId: string) => void;
+    dynamicTips?: string[];
 }
 
 const CHECKLIST_CATEGORY_LABELS: Record<string, string> = {
@@ -12,7 +13,7 @@ const CHECKLIST_CATEGORY_LABELS: Record<string, string> = {
     other: '其他',
 };
 
-export default function ChecklistSection({ checklist, onToggle }: ChecklistSectionProps) {
+export default function ChecklistSection({ checklist, onToggle, dynamicTips = [] }: ChecklistSectionProps) {
     if (checklist.length === 0) {
         return (
             <div className="bg-white rounded-lg shadow-md p-6">
@@ -33,6 +34,16 @@ export default function ChecklistSection({ checklist, onToggle }: ChecklistSecti
     return (
         <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-2xl font-bold mb-4">📋 行前檢查清單</h2>
+            {dynamicTips.length > 0 && (
+                <div className="mb-5 rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900">
+                    <p className="font-semibold mb-2">雪場智慧建議</p>
+                    <ul className="list-disc pl-5 space-y-1 text-blue-800">
+                        {dynamicTips.map((tip) => (
+                            <li key={tip}>{tip}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
 
             {Object.entries(groupedItems).map(([category, items]) => (
                 <div key={category} className="mb-6 last:mb-0">

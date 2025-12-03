@@ -44,6 +44,9 @@ class PrismaDB implements Database {
           location: data.location,
           link: data.link,
           note: data.note,
+          resort_id: data.resort_id ?? null,
+          resort_name: data.resort_name ?? null,
+          region: data.region ?? null,
         },
       });
       return item as ItemData;
@@ -58,18 +61,30 @@ class PrismaDB implements Database {
 
   async updateItem(id: string, data: Partial<ItemData>): Promise<ItemData> {
     try {
+      const updateData: Record<string, unknown> = {
+        type: data.type,
+        title: data.title,
+        date: data.date,
+        time: data.time,
+        time_hint: data.time_hint,
+        location: data.location,
+        link: data.link,
+        note: data.note,
+      };
+
+      if ('resort_id' in data) {
+        updateData.resort_id = data.resort_id ?? null;
+      }
+      if ('resort_name' in data) {
+        updateData.resort_name = data.resort_name ?? null;
+      }
+      if ('region' in data) {
+        updateData.region = data.region ?? null;
+      }
+
       const item = await prisma.item.update({
         where: { id },
-        data: {
-          type: data.type,
-          title: data.title,
-          date: data.date,
-          time: data.time,
-          time_hint: data.time_hint,
-          location: data.location,
-          link: data.link,
-          note: data.note,
-        },
+        data: updateData,
       });
       return item as ItemData;
     } catch (error: any) {
@@ -108,6 +123,9 @@ class PrismaDB implements Database {
           label: data.label,
           city: data.city,
           is_ski_day: data.is_ski_day,
+          resort_id: data.resort_id ?? null,
+          resort_name: data.resort_name ?? null,
+          region: data.region ?? null,
         },
       });
       return day as DayData;
@@ -121,14 +139,26 @@ class PrismaDB implements Database {
 
   async updateDay(id: string, data: Partial<DayData>): Promise<DayData> {
     try {
+      const updateData: Record<string, unknown> = {
+        day_index: data.day_index,
+        label: data.label,
+        city: data.city,
+        is_ski_day: data.is_ski_day,
+      };
+
+      if ('resort_id' in data) {
+        updateData.resort_id = data.resort_id ?? null;
+      }
+      if ('resort_name' in data) {
+        updateData.resort_name = data.resort_name ?? null;
+      }
+      if ('region' in data) {
+        updateData.region = data.region ?? null;
+      }
+
       const day = await prisma.day.update({
         where: { id },
-        data: {
-          day_index: data.day_index,
-          label: data.label,
-          city: data.city,
-          is_ski_day: data.is_ski_day,
-        },
+        data: updateData,
       });
       return day as DayData;
     } catch (error: any) {
@@ -199,6 +229,9 @@ class PrismaDB implements Database {
             label: day.label,
             city: day.city,
             is_ski_day: day.is_ski_day,
+            resort_id: day.resort_id ?? null,
+            resort_name: day.resort_name ?? null,
+            region: day.region ?? null,
             items: {
               create: day.items.map((item) => ({
                 id: item.id,
@@ -211,6 +244,9 @@ class PrismaDB implements Database {
                 link: item.link,
                 note: item.note,
                 created_at: item.created_at,
+                resort_id: item.resort_id ?? null,
+                resort_name: item.resort_name ?? null,
+                region: item.region ?? null,
               })),
             },
           })),

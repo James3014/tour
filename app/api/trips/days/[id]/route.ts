@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { UpdateDaySchema } from '@/lib/validation/schemas';
 import { z } from 'zod';
+import { syncUserResortPreferences } from '@/lib/services/preference-sync';
+import { resolveResortMetadata } from '@/lib/services/resort-metadata';
 
 /**
  * PATCH /api/trips/days/[id]
@@ -15,11 +17,18 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
-    // 驗證輸入
     const validatedData = UpdateDaySchema.parse(body);
+    const { resort_id, ...rest } = validatedData;
+    let payload = { ...rest };
 
-    // 直接更新
-    const updatedDay = await db.updateDay(id, validatedData);
+    if ('resort_id' in validatedData) {
+      const meta = await resolveResortMetadata(resort_id ?? null);
+      payload = { ...payload, ...meta };
+    }
+
+    const updatedDay = await db.updateDay(id, payload);
+    const trip = await db.getTripById(updatedDay.trip_id);
+    await syncUserResortPreferences(trip);
 
     return NextResponse.json(updatedDay);
   } catch (error) {
@@ -29,6 +38,11 @@ export async function PATCH(
         { error: 'Validation failed', details: error.issues },
         { status: 400 }
       );
+    }
+
+    // Resort 錯誤
+    if (error instanceof Error && error.message.includes('Resort')) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
     // Not Found 錯誤
@@ -53,9 +67,14 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    const day = await db.getDayById(id);
+    if (!day) {
+      return NextResponse.json({ error: 'Day not found' }, { status: 404 });
+    }
 
-    // 直接刪除（包含 cascade delete 和 reorder）
     await db.deleteDay(id);
+    const trip = await db.getTripById(day.trip_id);
+    await syncUserResortPreferences(trip);
 
     return NextResponse.json({ success: true });
   } catch (error) {

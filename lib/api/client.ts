@@ -10,6 +10,16 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
     return res.json();
 }
 
+function serializeDayPayload(data: Partial<DayData>): Record<string, unknown> {
+    const { resort_name, region, id, trip_id, ...rest } = data;
+    return rest;
+}
+
+function serializeItemPayload(data: Partial<ItemData>): Record<string, unknown> {
+    const { resort_name, region, id, day_id, created_at, ...rest } = data;
+    return rest;
+}
+
 export const tripApi = {
     // Trip operations
     getTrip: (id: string) => fetchJson<TripWithDetails>(`${BASE_URL}/${id}`),
@@ -26,14 +36,14 @@ export const tripApi = {
         fetchJson<DayData>('/api/trips/days', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ trip_id: tripId, ...data }),
+            body: JSON.stringify({ trip_id: tripId, ...serializeDayPayload(data) }),
         }),
 
     updateDay: (dayId: string, data: Partial<DayData>) =>
         fetchJson<DayData>(`/api/trips/days/${dayId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
+            body: JSON.stringify(serializeDayPayload(data)),
         }),
 
     deleteDay: (dayId: string) =>
@@ -46,14 +56,14 @@ export const tripApi = {
         fetchJson<void>(`${BASE_URL}/days/${dayId}/items`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
+            body: JSON.stringify(serializeItemPayload(data)),
         }),
 
     updateItem: (itemId: string, data: Partial<ItemData>) =>
         fetchJson<void>(`${BASE_URL}/items/${itemId}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
+            body: JSON.stringify(serializeItemPayload(data)),
         }),
 
     deleteItem: (itemId: string) =>

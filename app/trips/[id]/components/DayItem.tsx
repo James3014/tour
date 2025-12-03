@@ -1,14 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DayData, ItemData } from '@/lib/types/template';
 import TripItem from './TripItem';
 import ItemEditForm from './ItemEditForm';
 import { sortTripItems } from '@/lib/utils/sort';
+import ResortSearchInput from '@/components/ResortSearchInput';
+import type { ResortSummary } from '@/lib/types/resort';
 
 interface DayItemProps {
     day: DayData & { items: ItemData[] };
     tripStartDate: Date | null;
     isExpanded: boolean;
     onToggle: () => void;
+    onDayUpdate: (dayId: string, data: Partial<DayData>) => Promise<void>;
     onItemUpdate: (itemId: string, data: Partial<ItemData>) => Promise<void>;
     onItemDelete: (itemId: string) => Promise<void>;
     onItemAdd: (dayId: string, data: Partial<ItemData>) => Promise<void>;
@@ -19,15 +22,50 @@ export default function DayItem({
     tripStartDate,
     isExpanded,
     onToggle,
+    onDayUpdate,
     onItemUpdate,
     onItemDelete,
     onItemAdd,
 }: DayItemProps) {
     const [isAdding, setIsAdding] = useState(false);
+    const [editingResort, setEditingResort] = useState(false);
+    const [selectedResort, setSelectedResort] = useState<ResortSummary | null>(() =>
+        day.resort_id
+            ? {
+                resort_id: day.resort_id,
+                name: day.resort_name || day.resort_id,
+                region: day.region || '',
+                country_code: 'JP',
+              }
+            : null
+    );
+
+    useEffect(() => {
+        if (day.resort_id) {
+            setSelectedResort({
+                resort_id: day.resort_id,
+                name: day.resort_name || day.resort_id,
+                region: day.region || '',
+                country_code: 'JP',
+            });
+        } else {
+            setSelectedResort(null);
+        }
+    }, [day.resort_id, day.resort_name, day.region]);
 
     const handleAdd = async (data: Partial<ItemData>) => {
         await onItemAdd(day.id, data);
         setIsAdding(false);
+    };
+
+    const handleResortSelect = async (option: ResortSummary | null) => {
+        setSelectedResort(option);
+        setEditingResort(false);
+        await onDayUpdate(day.id, {
+            resort_id: option?.resort_id ?? null,
+            resort_name: option?.name ?? null,
+            region: option?.region ?? null,
+        });
     };
 
     // 計算具體日期
@@ -67,20 +105,64 @@ export default function DayItem({
                             {day.city}
                         </span>
                     )}
+                    {day.resort_name && (
+                        <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
+                            🏔️ {day.resort_name}
+                        </span>
+                    )}
                     {day.is_ski_day && (
                         <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
                             ⛷️ 滑雪日
                         </span>
                     )}
                 </div>
-                <span className="text-sm text-gray-500">
-                    {day.items.length} 個項目
-                </span>
+                <div className="flex items-center gap-3 text-sm text-gray-500">
+                    <span>{day.items.length} 個項目</span>
+                    <span
+                        role="button"
+                        tabIndex={0}
+                        className="text-blue-600 hover:underline focus:outline-none"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingResort((prev) => !prev);
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setEditingResort((prev) => !prev);
+                            }
+                        }}
+                    >
+                        {day.resort_id ? '變更雪場' : '指定雪場'}
+                    </span>
+                </div>
             </button>
 
             {/* Day Content */}
             {isExpanded && (
                 <div className="border-t border-gray-200 p-4">
+                    {day.resort_id && (
+                        <div className="mb-3 rounded-lg border border-purple-100 bg-purple-50 p-3 text-sm text-purple-900">
+                            <p className="font-semibold">
+                                {day.resort_name} · {day.region || '未指定區域'}
+                            </p>
+                            <p className="text-xs text-purple-700">
+                                建議提前查看雪場交通＆票價，確保當天滑雪安排順利。
+                            </p>
+                        </div>
+                    )}
+
+                    {editingResort && (
+                        <div className="mb-4">
+                            <ResortSearchInput
+                                value={selectedResort}
+                                onSelect={handleResortSelect}
+                                placeholder="輸入雪場名稱（例如 Niseko / Naeba）"
+                            />
+                        </div>
+                    )}
+
                     <div className="space-y-3">
                         {day.items.length === 0 ? (
                             <p className="text-gray-400 text-center py-4">尚無行程項目</p>

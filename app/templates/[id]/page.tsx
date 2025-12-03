@@ -3,12 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Template } from '@/lib/types/template';
+import type { ResortSummary } from '@/lib/types/resort';
 
 export default function TemplateDetailPage() {
   const params = useParams();
   const router = useRouter();
   const [template, setTemplate] = useState<Template | null>(null);
   const [loading, setLoading] = useState(true);
+  const [resorts, setResorts] = useState<Record<string, ResortSummary>>({});
 
   useEffect(() => {
     if (!params.id) return;
@@ -22,6 +24,29 @@ export default function TemplateDetailPage() {
       })
       .catch(() => setLoading(false));
   }, [params.id]);
+
+  useEffect(() => {
+    if (!template) return;
+    const ids = Array.from(
+      new Set(
+        template.day_templates
+          .map((d) => d.default_resort_id)
+          .filter((id): id is string => Boolean(id))
+      )
+    );
+    if (ids.length === 0) return;
+
+    fetch(`/api/resorts?ids=${ids.join(',')}`)
+      .then((res) => res.json())
+      .then((data: ResortSummary[]) => {
+        const map: Record<string, ResortSummary> = {};
+        data.forEach((r) => {
+          map[r.resort_id] = r;
+        });
+        setResorts(map);
+      })
+      .catch(() => setResorts({}));
+  }, [template]);
 
   if (loading) {
     return (
@@ -98,6 +123,25 @@ export default function TemplateDetailPage() {
             </div>
           </div>
 
+          {/* Resort Overview */}
+          {Object.keys(resorts).length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-lg font-bold mb-2">雪場亮點</h2>
+              <div className="grid gap-3">
+                {Object.values(resorts).map((resort) => (
+                  <div key={resort.resort_id} className="border border-purple-100 bg-purple-50 rounded-lg p-4">
+                    <p className="font-semibold text-purple-900">
+                      🏔️ {resort.name} · {resort.region}
+                    </p>
+                    {resort.tagline && (
+                      <p className="text-xs text-purple-700 mt-1">{resort.tagline}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Day Details */}
           <div className="mb-6">
             <h2 className="text-lg font-bold mb-3">詳細行程</h2>
@@ -113,9 +157,14 @@ export default function TemplateDetailPage() {
                       </span>
                     )}
                   </div>
-                  {day.default_city && (
-                    <p className="text-sm text-gray-600">📍 {day.default_city}</p>
-                  )}
+                  <div className="space-y-1 text-sm text-gray-600">
+                    {day.default_city && <p>📍 {day.default_city}</p>}
+                    {day.default_resort_id && (
+                      <p className="text-purple-700">
+                        推薦雪場：{resorts[day.default_resort_id]?.name || day.default_resort_id}
+                      </p>
+                    )}
+                  </div>
                   <ul className="mt-2 space-y-1">
                     {day.item_templates.map((item, idx) => (
                       <li key={idx} className="text-sm text-gray-700">

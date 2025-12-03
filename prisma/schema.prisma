@@ -31,6 +31,9 @@ model Day {
   label      String
   city       String?
   is_ski_day Boolean @default(false)
+  resort_id  String?
+  resort_name String?
+  region     String?
   items      Item[]
 
   @@index([trip_id])
@@ -50,6 +53,9 @@ model Item {
   link       String?
   note       String?
   created_at DateTime  @default(now())
+  resort_id  String?
+  resort_name String?
+  region     String?
 
   @@index([day_id])
 }

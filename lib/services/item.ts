@@ -22,6 +22,9 @@ export interface CreateItemInput {
   location?: string | null;
   link?: string | null;
   note?: string | null;
+  resort_id?: string | null;
+  resort_name?: string | null;
+  region?: string | null;
 }
 
 /**
@@ -58,6 +61,9 @@ export function createItemInDay(input: CreateItemInput): ItemData {
     time: input.time ?? null,
     time_hint: input.time_hint ?? null,
     location: input.location ?? null,
+    resort_id: input.resort_id ?? null,
+    resort_name: input.resort_name ?? null,
+    region: input.region ?? null,
     link: input.link ?? null,
     note: input.note ?? null,
     created_at: new Date(),

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { CreateItemSchema } from '@/lib/validation/schemas';
 import { z } from 'zod';
+import { syncUserResortPreferences } from '@/lib/services/preference-sync';
+import { resolveResortMetadata } from '@/lib/services/resort-metadata';
 
 /**
  * POST /api/trips/days/[id]/items
@@ -17,10 +19,14 @@ export async function POST(
     const { id: dayId } = await params;
     const body = await request.json();
 
-    // 驗證輸入
     const validatedData = CreateItemSchema.parse(body);
+    const parentDay = await db.getDayById(dayId);
+    if (!parentDay) {
+      return NextResponse.json({ error: 'Day not found' }, { status: 404 });
+    }
 
-    // 準備數據（移除 undefined）
+    const resortMeta = await resolveResortMetadata(validatedData.resort_id ?? null);
+
     const itemData = {
       type: validatedData.type,
       title: validatedData.title,
@@ -30,10 +36,12 @@ export async function POST(
       location: validatedData.location ?? null,
       link: validatedData.link ?? null,
       note: validatedData.note ?? null,
+      ...resortMeta,
     };
 
-    // 直接創建 - O(1)!
     const newItem = await db.createItem(dayId, itemData);
+    const trip = await db.getTripById(parentDay.trip_id);
+    await syncUserResortPreferences(trip);
 
     return NextResponse.json(newItem, { status: 201 });
   } catch (error) {
@@ -43,6 +51,11 @@ export async function POST(
         { error: 'Validation failed', details: error.issues },
         { status: 400 }
       );
+    }
+
+    // Resort 錯誤
+    if (error instanceof Error && error.message.includes('Resort')) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
     // Not Found 錯誤（Day 不存在）

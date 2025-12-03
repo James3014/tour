@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { TripWithDetails, ChecklistItem, PackingItem, ItemData } from '@/lib/types/template';
+import { TripWithDetails, ChecklistItem, PackingItem, ItemData, DayData } from '@/lib/types/template';
 import { tripApi } from '@/lib/api/client';
 
 interface UseTripReturn {
@@ -11,6 +11,7 @@ interface UseTripReturn {
     actions: {
         refresh: () => Promise<void>;
         updateTrip: (data: Partial<TripWithDetails>) => Promise<void>;
+        updateDay: (dayId: string, data: Partial<DayData>) => Promise<void>;
         updateItem: (itemId: string, data: Partial<ItemData>) => Promise<void>;
         deleteItem: (itemId: string) => Promise<void>;
         addItem: (dayId: string, data: Partial<ItemData>) => Promise<void>;
@@ -84,6 +85,20 @@ export function useTrip(tripId: string): UseTripReturn {
             (prev) => ({ ...prev, ...data }),
             () => tripApi.updateTrip(tripId, data)
         );
+
+    const updateDay = async (dayId: string, data: Partial<DayData>) => {
+        await withOptimistic(
+            (prev) => ({
+                ...prev,
+                days: prev.days.map((day) =>
+                    day.id === dayId ? { ...day, ...data } : day
+                ),
+            }),
+            async () => {
+                await tripApi.updateDay(dayId, data);
+            }
+        );
+    };
 
     const updateItem = (itemId: string, data: Partial<ItemData>) =>
         withOptimistic(
@@ -181,6 +196,7 @@ export function useTrip(tripId: string): UseTripReturn {
         actions: {
             refresh,
             updateTrip,
+            updateDay,
             updateItem,
             deleteItem,
             addItem,

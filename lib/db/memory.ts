@@ -36,6 +36,9 @@ class MemoryDB implements Database {
       day_id: dayId,
       created_at: new Date(),
       ...data,
+      resort_id: data.resort_id ?? null,
+      resort_name: data.resort_name ?? null,
+      region: data.region ?? null,
     };
 
     this.items.set(item.id, item);
@@ -75,6 +78,9 @@ class MemoryDB implements Database {
       id: crypto.randomUUID(),
       trip_id: tripId,
       ...data,
+      resort_id: data.resort_id ?? null,
+      resort_name: data.resort_name ?? null,
+      region: data.region ?? null,
     };
 
     this.days.set(day.id, day);
@@ -137,6 +143,9 @@ class MemoryDB implements Database {
         label: day.label,
         city: day.city,
         is_ski_day: day.is_ski_day,
+        resort_id: day.resort_id ?? null,
+        resort_name: day.resort_name ?? null,
+        region: day.region ?? null,
       });
 
       for (const item of day.items) {

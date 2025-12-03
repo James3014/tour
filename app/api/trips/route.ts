@@ -4,6 +4,8 @@ import { createChecklistFromTemplate, createPackingFromTemplate } from '@/lib/se
 import { db } from '@/lib/db';
 import { CreateTripSchema, GetTripsSchema } from '@/lib/validation/schemas';
 import { z } from 'zod';
+import { enrichTripWithResorts } from '@/lib/services/resort-metadata';
+import { syncUserResortPreferences } from '@/lib/services/preference-sync';
 
 /**
  * POST /api/trips
@@ -17,7 +19,7 @@ export async function POST(request: NextRequest) {
     const validatedData = CreateTripSchema.parse(body);
 
     // 1. 創建 Trip
-    const trip = createTripFromTemplate({
+    let trip = createTripFromTemplate({
       template_id: validatedData.template_id,
       user_id: validatedData.user_id,
       title: validatedData.title,
@@ -27,7 +29,9 @@ export async function POST(request: NextRequest) {
       note: validatedData.note ?? null,
     });
 
-    await db.createTrip(trip);
+    trip = await enrichTripWithResorts(trip);
+    const createdTrip = await db.createTrip(trip);
+    await syncUserResortPreferences(createdTrip);
 
     // 2. 創建 Checklist 項目
     const checklistItems = createChecklistFromTemplate(
@@ -47,7 +51,7 @@ export async function POST(request: NextRequest) {
       await db.createPackingItems(packingItems);
     }
 
-    return NextResponse.json(trip, { status: 201 });
+    return NextResponse.json(createdTrip, { status: 201 });
   } catch (error) {
     // Zod 验证错误
     if (error instanceof z.ZodError) {
@@ -55,6 +59,11 @@ export async function POST(request: NextRequest) {
         { error: '输入验证失败', details: error.issues },
         { status: 400 }
       );
+    }
+
+    // Resort 無效
+    if (error instanceof Error && error.message.includes('Unknown resort ids')) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
     // 其他错误

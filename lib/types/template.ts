@@ -28,6 +28,8 @@ export interface ItemTemplate {
   time_hint?: TimeHint;
   location_hint?: string;
   note_default?: string;
+  resort_id?: string;
+  suggested_resorts?: string[];
 }
 
 /**
@@ -38,6 +40,7 @@ export interface DayTemplate {
   label: string;
   default_city?: string;
   is_ski_day: boolean;
+  default_resort_id?: string | null;
   item_templates: ItemTemplate[];
 }
 
@@ -93,6 +96,9 @@ export interface DayData {
   label: string;
   city: string | null;
   is_ski_day: boolean;
+  resort_id: string | null;
+  resort_name: string | null;
+  region: string | null;
 }
 
 /**
@@ -110,6 +116,9 @@ export interface ItemData {
   link: string | null;         // 相關連結（如訂單、地圖）
   note: string | null;         // 備註
   created_at: Date;
+  resort_id: string | null;
+  resort_name: string | null;
+  region: string | null;
 }
 
 /**

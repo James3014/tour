@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ItemData, ItemType, TimeHint } from '@/lib/types/template';
 import { ItemFormSchema, ItemFormValues } from './schemas';
 import { z } from 'zod';
+import ResortSearchInput from '@/components/ResortSearchInput';
+import type { ResortSummary } from '@/lib/types/resort';
 
 interface ItemEditFormProps {
     initialData?: Partial<ItemData>;
@@ -36,6 +38,27 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [saving, setSaving] = useState(false);
     const [showMore, setShowMore] = useState(false);
+    const [selectedResort, setSelectedResort] = useState<ResortSummary | null>(() =>
+        initialData.resort_id
+            ? {
+                resort_id: initialData.resort_id,
+                name: initialData.resort_name || initialData.resort_id,
+                region: initialData.region || '',
+                country_code: 'JP',
+              }
+            : null
+    );
+
+    useEffect(() => {
+        if (initialData.resort_id) {
+            setSelectedResort({
+                resort_id: initialData.resort_id,
+                name: initialData.resort_name || initialData.resort_id,
+                region: initialData.region || '',
+                country_code: 'JP',
+            });
+        }
+    }, [initialData.resort_id, initialData.resort_name, initialData.region]);
 
     const validate = () => {
         try {
@@ -87,6 +110,13 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
                 return rest;
             });
         }
+    };
+
+    const handleResortSelect = (option: ResortSummary | null) => {
+        setSelectedResort(option);
+        handleChange('resort_id', option?.resort_id ?? null);
+        handleChange('region', option?.region ?? null);
+        handleChange('resort_name', option?.name ?? null);
     };
 
     return (
@@ -159,10 +189,26 @@ export default function ItemEditForm({ initialData = {}, onSave, onCancel, mode 
                         onClick={() => setShowMore(true)}
                         className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
                     >
-                        <span>+ 顯示更多選項 (地點、連結、備註)</span>
+                        <span>+ 顯示更多選項 (雪場、地點、連結、備註)</span>
                     </button>
                 ) : (
                     <div className="space-y-3 border-t pt-3 mt-2">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                指定雪場
+                            </label>
+                            <ResortSearchInput
+                                value={selectedResort}
+                                onSelect={handleResortSelect}
+                                placeholder="輸入雪場名稱或地區"
+                            />
+                            {selectedResort && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                    已選：{selectedResort.name}（{selectedResort.region}）
+                                </p>
+                            )}
+                        </div>
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 地點

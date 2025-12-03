@@ -52,6 +52,7 @@ export const HOKKAIDO_6D_TEMPLATE: Template = {
       label: '滑雪日 1',
       default_city: '某滑雪場',
       is_ski_day: true,
+      default_resort_id: 'hokkaido_niseko_moiwa',
       item_templates: [
         {
           type: 'transfer',
@@ -64,12 +65,15 @@ export const HOKKAIDO_6D_TEMPLATE: Template = {
           title_default: '滑雪日 1（自由滑＋初階適應）',
           time_hint: 'full_day',
           note_default: '可在備註寫上今天目標：熟悉雪板、練習剎車與轉彎',
+          resort_id: 'hokkaido_niseko_moiwa',
+          suggested_resorts: ['hokkaido_rusutsu', 'hokkaido_furano'],
         },
         {
           type: 'lesson',
           title_default: '初級課程（選填）',
           time_hint: 'morning',
           note_default: '請填寫課程時間、教練姓名、聯絡方式',
+          resort_id: 'hokkaido_niseko_moiwa',
         },
         {
           type: 'transfer',
@@ -84,6 +88,7 @@ export const HOKKAIDO_6D_TEMPLATE: Template = {
       label: '滑雪日 2',
       default_city: '某滑雪場',
       is_ski_day: true,
+      default_resort_id: 'hokkaido_furano',
       item_templates: [
         {
           type: 'transfer',
@@ -96,12 +101,15 @@ export const HOKKAIDO_6D_TEMPLATE: Template = {
           title_default: '滑雪日 2（技巧練習）',
           time_hint: 'full_day',
           note_default: '可在備註寫上今天目標：練習轉彎、提升速度控制',
+          resort_id: 'hokkaido_furano',
+          suggested_resorts: ['hokkaido_tomamu'],
         },
         {
           type: 'lesson',
           title_default: '進階課程／團體課（選填）',
           time_hint: 'morning',
           note_default: '請填寫課程時間、教練姓名、聯絡方式',
+          resort_id: 'hokkaido_furano',
         },
         {
           type: 'transfer',
@@ -116,6 +124,7 @@ export const HOKKAIDO_6D_TEMPLATE: Template = {
       label: '滑雪日 3',
       default_city: '某滑雪場',
       is_ski_day: true,
+      default_resort_id: 'hokkaido_rusutsu',
       item_templates: [
         {
           type: 'transfer',
@@ -128,6 +137,7 @@ export const HOKKAIDO_6D_TEMPLATE: Template = {
           title_default: '滑雪日 3（自由滑＋拍照）',
           time_hint: 'full_day',
           note_default: '最後一天，盡情享受！可安排團體照時間',
+          resort_id: 'hokkaido_rusutsu',
         },
         {
           type: 'note',

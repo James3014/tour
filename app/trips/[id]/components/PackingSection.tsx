@@ -1,8 +1,9 @@
-import { PackingItem, PackingCategory } from '@/lib/types/template';
+import { PackingItem } from '@/lib/types/template';
 
 interface PackingSectionProps {
     packing: PackingItem[];
     onToggle: (itemId: string) => void;
+    suggestions?: string[];
 }
 
 const PACKING_CATEGORY_LABELS: Record<string, string> = {
@@ -13,7 +14,7 @@ const PACKING_CATEGORY_LABELS: Record<string, string> = {
     other: '📦 其他',
 };
 
-export default function PackingSection({ packing, onToggle }: PackingSectionProps) {
+export default function PackingSection({ packing, onToggle, suggestions = [] }: PackingSectionProps) {
     if (packing.length === 0) {
         return (
             <div className="bg-white rounded-lg shadow-md p-6">
@@ -34,6 +35,16 @@ export default function PackingSection({ packing, onToggle }: PackingSectionProp
     return (
         <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-2xl font-bold mb-4">🎒 打包清單</h2>
+            {suggestions.length > 0 && (
+                <div className="mb-5 rounded-lg border border-green-100 bg-green-50 p-4 text-sm text-green-900">
+                    <p className="font-semibold mb-2">依雪場推薦的打包重點</p>
+                    <ul className="list-disc pl-5 space-y-1 text-green-800">
+                        {suggestions.map((item) => (
+                            <li key={item}>{item}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
 
             {Object.entries(groupedItems).map(([category, items]) => (
                 <div key={category} className="mb-6 last:mb-0">

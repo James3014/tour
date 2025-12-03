@@ -13,6 +13,7 @@ export const ItemFormSchema = z.object({
     location: z.string().optional().nullable(),
     link: z.string().url('請輸入有效的網址').optional().nullable().or(z.literal('')),
     note: z.string().optional().nullable(),
+    resort_id: z.string().optional().nullable(),
 });
 
 export type ItemFormValues = z.infer<typeof ItemFormSchema>;

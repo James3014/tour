@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useTrip } from './hooks/useTrip';
 import TripHeader from './components/TripHeader';
 import DayItem from './components/DayItem';
 import ChecklistSection from './components/ChecklistSection';
 import PackingSection from './components/PackingSection';
+import type { TripWithDetails } from '@/lib/types/template';
 
 type TabType = 'itinerary' | 'preparation';
 
@@ -19,6 +20,8 @@ export default function TripDetailPage() {
   const [activeTab, setActiveTab] = useState<TabType>('itinerary');
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({});
   const hasInitialized = useRef(false);
+
+  const resortInsights = useMemo(() => buildResortInsights(trip?.days || []), [trip?.days]);
 
   // Auto-expand first 2 days only on initial load
   useEffect(() => {
@@ -149,6 +152,7 @@ export default function TripDetailPage() {
                 tripStartDate={trip.start_date ? new Date(trip.start_date) : null}
                 isExpanded={!!expandedDays[day.id]}
                 onToggle={() => toggleDay(day.id)}
+                onDayUpdate={(dayId, data) => handleAction(() => actions.updateDay(dayId, data), '更新雪場失敗')}
                 onItemUpdate={(id, data) => handleAction(() => actions.updateItem(id, data), '儲存失敗')}
                 onItemDelete={(id) => handleAction(() => actions.deleteItem(id), '刪除失敗')}
                 onItemAdd={(dayId, data) => handleAction(() => actions.addItem(dayId, data), '新增失敗')}
@@ -159,10 +163,12 @@ export default function TripDetailPage() {
           <div className="space-y-6">
             <ChecklistSection
               checklist={checklist}
+              dynamicTips={resortInsights.checklistTips}
               onToggle={(id) => handleAction(() => actions.toggleChecklist(id), '更新失敗')}
             />
             <PackingSection
               packing={packing}
+              suggestions={resortInsights.packingSuggestions}
               onToggle={(id) => handleAction(() => actions.togglePacking(id), '更新失敗')}
             />
           </div>
@@ -170,4 +176,49 @@ export default function TripDetailPage() {
       </div>
     </main>
   );
+}
+
+function buildResortInsights(days: TripWithDetails['days'] = []) {
+  const regions = new Set<string>();
+  const names = new Set<string>();
+
+  days.forEach((day) => {
+    if (day.region) regions.add(day.region);
+    if (day.resort_name) names.add(day.resort_name);
+    day.items.forEach((item) => {
+      if (item.region) regions.add(item.region);
+      if (item.resort_name) names.add(item.resort_name);
+    });
+  });
+
+  const checklistTips: string[] = [];
+  const packingSuggestions: string[] = [];
+
+  const hasHokkaido = Array.from(regions).some((r) => /北海道|Hokkaido/i.test(r));
+  const hasNagano = Array.from(regions).some((r) => /長野|Nagano/i.test(r));
+  const hasNiigata = Array.from(regions).some((r) => /新潟|Niigata/i.test(r));
+
+  if (hasHokkaido) {
+    checklistTips.push('北海道行程：記得預留交通緩衝並提前查看暴風雪公告。');
+    packingSuggestions.push('極地保暖層（發熱衣、羽絨外套、面罩）');
+  }
+
+  if (hasNagano) {
+    checklistTips.push('長野溫泉區：確認住宿是否提供溫泉，帶好泳衣或拖鞋。');
+    packingSuggestions.push('溫泉裝備（泳衣/輕便浴衣）與小額現金');
+  }
+
+  if (hasNiigata) {
+    checklistTips.push('新潟粉雪多，安排備用交通與夜滑場地確認。');
+    packingSuggestions.push('護目鏡備用鏡片與防水手套');
+  }
+
+  if (names.size > 0) {
+    checklistTips.push(`本行程涵蓋雪場：${Array.from(names).join('、')}。請逐一確認票券與租借需求。`);
+  }
+
+  return {
+    checklistTips,
+    packingSuggestions,
+  };
 }

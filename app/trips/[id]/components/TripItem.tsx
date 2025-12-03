@@ -92,6 +92,17 @@ export default function TripItem({ item, onUpdate, onDelete }: TripItemProps) {
                             {item.note}
                         </p>
                     )}
+                    {item.resort_name && (
+                        <div className="mt-3 rounded-lg border border-purple-100 bg-purple-50 p-3 text-xs text-purple-900">
+                            <p className="font-semibold">
+                                🏔️ {item.resort_name}
+                                {item.region ? ` · ${item.region}` : ''}
+                            </p>
+                            <p className="mt-1">
+                                {describeResortHighlight(item.region)}
+                            </p>
+                        </div>
+                    )}
                 </div>
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                     <button
@@ -110,4 +121,18 @@ export default function TripItem({ item, onUpdate, onDelete }: TripItemProps) {
             </div>
         </div>
     );
+}
+
+function describeResortHighlight(region?: string | null) {
+    if (!region) return '查看雪場交通、票價與租借資訊，避免臨時狀況。';
+    if (/北海道|Hokkaido/i.test(region)) {
+        return '北海道粉雪：注意防寒，善用巴士接駁並預訂夜滑。';
+    }
+    if (/長野|Nagano/i.test(region)) {
+        return '長野山谷：許多雪場鄰近溫泉小鎮，建議安排泡湯與美食。';
+    }
+    if (/新潟|Niigata/i.test(region)) {
+        return '新潟越後：交通依賴新幹線與巴士，記得預留通勤時間。';
+    }
+    return '確認雪場營運時段與天氣，提前鎖定交通與票券。';
 }
