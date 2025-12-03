@@ -1,6 +1,19 @@
 import { useState } from 'react';
-import { ItemData } from '@/lib/types/template';
+import { ItemData, ItemType } from '@/lib/types/template';
 import ItemEditForm from './ItemEditForm';
+import Image from 'next/image';
+
+// Map item types to icon background images
+const ICON_BACKGROUNDS: Record<ItemType, string> = {
+  flight: '/images/icons/icon-flight-bg.png',
+  hotel: '/images/icons/icon-hotel-bg.png',
+  transfer: '/images/icons/icon-transfer-bg.png',
+  ski: '/images/icons/icon-ski-bg.png',
+  lesson: '/images/icons/icon-lesson-bg.png',
+  todo: '/images/icons/icon-todo-bg.png',
+  note: '/images/icons/icon-note-bg.png',
+  other: '/images/icons/icon-other-bg.png',
+};
 
 interface TripItemProps {
     item: ItemData;
@@ -51,12 +64,21 @@ export default function TripItem({ item, onUpdate, onDelete }: TripItemProps) {
         );
     }
 
+    const iconBg = ICON_BACKGROUNDS[item.type] || ICON_BACKGROUNDS.other;
+
     return (
         <div className="relative bg-zinc-900/50 border border-emerald-500/20 rounded-lg p-3 sm:p-4 hover:bg-zinc-900/70 hover:border-emerald-500/40 transition-all group">
             <div className="flex items-start gap-3">
-                {/* Icon with gradient background */}
-                <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-lg flex items-center justify-center text-xl sm:text-2xl border border-emerald-500/30">
-                    {ITEM_TYPE_LABELS[item.type]?.split(' ')[0] || '📌'}
+                {/* Icon with custom background image */}
+                <div className="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center text-xl sm:text-2xl border border-emerald-500/30 relative overflow-hidden">
+                    <Image
+                        src={iconBg}
+                        alt={item.type}
+                        fill
+                        className="object-cover opacity-40"
+                        sizes="48px"
+                    />
+                    <span className="relative z-10">{ITEM_TYPE_LABELS[item.type]?.split(' ')[0] || '📌'}</span>
                 </div>
 
                 <div className="flex-1 min-w-0">

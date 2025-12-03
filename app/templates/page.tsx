@@ -3,6 +3,15 @@
 import { useEffect, useState } from 'react';
 import { Template } from '@/lib/types/template';
 import Link from 'next/link';
+import Image from 'next/image';
+
+// Map template names to image filenames
+const TEMPLATE_IMAGES: Record<string, string> = {
+  '東北精華 5 日': '/images/templates/template-hokkaido-nagano.jpg',
+  '新手友善 4 日': '/images/templates/template-beginner.jpg',
+  '深度探索 7 日': '/images/templates/template-advanced.jpg',
+  '家庭親子 6 日': '/images/templates/template-family.jpg',
+};
 
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -55,16 +64,30 @@ export default function TemplatesPage() {
         </div>
 
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-2">
-          {templates.map((template) => (
-            <div
-              key={template.template_id}
-              className="tour-card p-4 sm:p-6 hover:tour-card-animate relative group"
-            >
-              <div className="relative z-10">
-                <h2 className="font-display text-2xl sm:text-3xl mb-2 sm:mb-3 text-gradient-velocity tracking-wide skew-title">
-                  <span className="unskew inline-block">{template.name}</span>
-                </h2>
-                <p className="text-zinc-400 text-sm sm:text-base mb-4 sm:mb-6 leading-relaxed">{template.description}</p>
+          {templates.map((template) => {
+            const imageUrl = TEMPLATE_IMAGES[template.name] || '/images/templates/template-beginner.jpg';
+            return (
+              <div
+                key={template.template_id}
+                className="tour-card p-0 hover:tour-card-animate relative group overflow-hidden"
+              >
+                {/* Template Image */}
+                <div className="relative w-full h-48 sm:h-56 overflow-hidden">
+                  <Image
+                    src={imageUrl}
+                    alt={template.name}
+                    fill
+                    className="object-cover opacity-80"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent"></div>
+                </div>
+
+                <div className="relative z-10 p-4 sm:p-6">
+                  <h2 className="font-display text-2xl sm:text-3xl mb-2 sm:mb-3 text-gradient-velocity tracking-wide skew-title">
+                    <span className="unskew inline-block">{template.name}</span>
+                  </h2>
+                  <p className="text-zinc-400 text-sm sm:text-base mb-4 sm:mb-6 leading-relaxed">{template.description}</p>
 
                 {/* 日程預覽條 */}
                 <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-zinc-900/50 rounded-lg border border-emerald-500/20">
@@ -105,16 +128,17 @@ export default function TemplatesPage() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => (window.location.href = `/templates/${template.template_id}`)}
-                  className="btn-tour-primary w-full text-sm sm:text-base velocity-shine"
-                >
-                  查看詳情 →
-                </button>
+                  <button
+                    onClick={() => (window.location.href = `/templates/${template.template_id}`)}
+                    className="btn-tour-primary w-full text-sm sm:text-base velocity-shine"
+                  >
+                    查看詳情 →
+                  </button>
+                </div>
+                <div className="tour-card-stripes"></div>
               </div>
-              <div className="tour-card-stripes"></div>
-            </div>
-          ))}
+            );
+          })}
 
           {/* 從空白開始 */}
           <div className="tour-card p-4 sm:p-6 border-dashed border-2 border-emerald-500/30 hover:border-emerald-500/50 transition-all relative group">
