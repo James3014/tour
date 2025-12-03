@@ -81,47 +81,53 @@ export default function DayItem({
     const sortedItems = sortTripItems(day.items);
 
     return (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="tour-card overflow-hidden">
             {/* Day Header */}
             <button
                 onClick={onToggle}
-                className="w-full px-4 py-3 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors"
+                className="w-full px-3 sm:px-4 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 bg-zinc-800/30 hover:bg-zinc-800/50 transition-colors"
             >
-                <div className="flex items-center gap-3">
-                    <span className={`transform transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                    <span className={`transform transition-transform text-emerald-400 shrink-0 ${isExpanded ? 'rotate-90' : ''}`}>
                         ▶
                     </span>
-                    {/* 日期 Badge - 更醒目的顯示 */}
+
+                    {/* 日期 Badge */}
                     {formattedDate && (
-                        <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-sm font-medium">
-                            {formattedDate}
-                        </span>
+                        <div className="tour-badge badge-emerald shrink-0">
+                            <span className="tour-badge-inner text-xs sm:text-sm">{formattedDate}</span>
+                        </div>
                     )}
-                    <h3 className="font-bold text-lg">
+
+                    <h3 className="font-display text-base sm:text-lg text-gradient-velocity tracking-wide">
                         {day.label}
                     </h3>
+
                     {day.city && (
-                        <span className="text-sm text-gray-500 bg-white px-2 py-0.5 rounded border">
+                        <span className="text-xs sm:text-sm text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-700 shrink-0">
                             {day.city}
                         </span>
                     )}
+
                     {day.resort_name && (
-                        <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
-                            🏔️ {day.resort_name}
-                        </span>
+                        <div className="tour-badge badge-purple shrink-0">
+                            <span className="tour-badge-inner text-xs sm:text-sm">🏔️ {day.resort_name}</span>
+                        </div>
                     )}
+
                     {day.is_ski_day && (
-                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
-                            ⛷️ 滑雪日
-                        </span>
+                        <div className="tour-badge badge-teal shrink-0">
+                            <span className="tour-badge-inner text-xs sm:text-sm">⛷️ 滑雪日</span>
+                        </div>
                     )}
                 </div>
-                <div className="flex items-center gap-3 text-sm text-gray-500">
-                    <span>{day.items.length} 個項目</span>
+
+                <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-zinc-500 self-start sm:self-auto">
+                    <span className="whitespace-nowrap">{day.items.length} 個項目</span>
                     <span
                         role="button"
                         tabIndex={0}
-                        className="text-blue-600 hover:underline focus:outline-none"
+                        className="text-emerald-400 hover:text-emerald-300 focus:outline-none whitespace-nowrap"
                         onClick={(e) => {
                             e.stopPropagation();
                             setEditingResort((prev) => !prev);
@@ -141,13 +147,13 @@ export default function DayItem({
 
             {/* Day Content */}
             {isExpanded && (
-                <div className="border-t border-gray-200 p-4">
+                <div className="border-t border-emerald-500/20 p-3 sm:p-4 bg-zinc-900/20">
                     {day.resort_id && (
-                        <div className="mb-3 rounded-lg border border-purple-100 bg-purple-50 p-3 text-sm text-purple-900">
-                            <p className="font-semibold">
+                        <div className="mb-3 sm:mb-4 rounded-lg border border-purple-500/30 bg-purple-500/10 p-3 sm:p-4 text-xs sm:text-sm">
+                            <p className="font-bold text-purple-300 mb-1">
                                 {day.resort_name} · {day.region || '未指定區域'}
                             </p>
-                            <p className="text-xs text-purple-700">
+                            <p className="text-purple-400/80 leading-relaxed">
                                 建議提前查看雪場交通＆票價，確保當天滑雪安排順利。
                             </p>
                         </div>
@@ -165,7 +171,7 @@ export default function DayItem({
 
                     <div className="space-y-3">
                         {day.items.length === 0 ? (
-                            <p className="text-gray-400 text-center py-4">尚無行程項目</p>
+                            <p className="text-zinc-500 text-center py-6 sm:py-8 text-sm">尚無行程項目</p>
                         ) : (
                             sortedItems.map((item) => (
                                 <div key={item.id}>
@@ -181,7 +187,7 @@ export default function DayItem({
 
                     {/* Add Item Form */}
                     {isAdding ? (
-                        <div className="mt-3">
+                        <div className="mt-3 sm:mt-4">
                             <ItemEditForm
                                 mode="add"
                                 onSave={handleAdd}
@@ -191,13 +197,14 @@ export default function DayItem({
                     ) : (
                         <button
                             onClick={() => setIsAdding(true)}
-                            className="w-full mt-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="w-full mt-3 sm:mt-4 py-2 sm:py-3 text-xs sm:text-sm text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-colors border border-emerald-500/30 hover:border-emerald-500/50 font-bold"
                         >
                             + 新增項目
                         </button>
                     )}
                 </div>
             )}
+            <div className="tour-card-stripes"></div>
         </div>
     );
 }

@@ -53,14 +53,14 @@ export default function TripDetailPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen p-8">
+      <main className="min-h-screen p-4 sm:p-8">
         <div className="max-w-5xl mx-auto">
-          <div className="animate-pulse space-y-8">
-            <div className="h-48 bg-gray-200 rounded-lg"></div>
-            <div className="h-12 bg-gray-200 rounded-lg w-1/3"></div>
+          <div className="space-y-4 sm:space-y-8">
+            <div className="tour-card h-48 loading-pulse"></div>
+            <div className="tour-card h-12 loading-pulse w-full sm:w-1/3"></div>
             <div className="space-y-4">
-              <div className="h-32 bg-gray-200 rounded-lg"></div>
-              <div className="h-32 bg-gray-200 rounded-lg"></div>
+              <div className="tour-card h-32 loading-pulse"></div>
+              <div className="tour-card h-32 loading-pulse"></div>
             </div>
           </div>
         </div>
@@ -70,19 +70,22 @@ export default function TripDetailPage() {
 
   if (error || !trip) {
     return (
-      <main className="min-h-screen p-8">
+      <main className="min-h-screen p-4 sm:p-8">
         <div className="max-w-5xl mx-auto">
-          <p className="text-red-500">{error || '找不到旅程'}</p>
-          <a href="/templates" className="text-blue-600 hover:underline mt-4 inline-block">
-            ← 返回模板選擇
-          </a>
+          <div className="tour-card p-6 sm:p-8">
+            <p className="text-red-400 mb-4">{error || '找不到旅程'}</p>
+            <a href="/templates" className="text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-2">
+              <span>←</span>
+              <span>返回模板選擇</span>
+            </a>
+          </div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
+    <main className="min-h-screen p-4 sm:p-6 lg:p-8">
       <div className="max-w-5xl mx-auto">
         <TripHeader
           trip={trip}
@@ -90,26 +93,28 @@ export default function TripDetailPage() {
         />
 
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-md mb-6">
-          <div className="border-b border-gray-200">
+        <div className="tour-card mb-4 sm:mb-6 overflow-hidden">
+          <div className="border-b border-emerald-500/20">
             <div className="flex">
               <button
                 onClick={() => setActiveTab('itinerary')}
-                className={`flex-1 px-6 py-4 font-semibold transition-colors ${activeTab === 'itinerary'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                className={`flex-1 px-4 sm:px-6 py-3 sm:py-4 font-bold transition-all text-sm sm:text-base ${activeTab === 'itinerary'
+                  ? 'text-emerald-400 border-b-2 border-emerald-500 bg-emerald-500/5'
+                  : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50'
                   }`}
               >
-                📍 行程
+                <span className="inline sm:hidden">📍</span>
+                <span className="hidden sm:inline">📍 行程</span>
               </button>
               <button
                 onClick={() => setActiveTab('preparation')}
-                className={`flex-1 px-6 py-4 font-semibold transition-colors ${activeTab === 'preparation'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-500 hover:text-gray-700'
+                className={`flex-1 px-4 sm:px-6 py-3 sm:py-4 font-bold transition-all text-sm sm:text-base ${activeTab === 'preparation'
+                  ? 'text-emerald-400 border-b-2 border-emerald-500 bg-emerald-500/5'
+                  : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/50'
                   }`}
               >
-                ✅ 行前準備
+                <span className="inline sm:hidden">✅</span>
+                <span className="hidden sm:inline">✅ 行前準備</span>
               </button>
             </div>
           </div>
@@ -118,11 +123,11 @@ export default function TripDetailPage() {
         {/* Tab Content */}
         {activeTab === 'itinerary' ? (
           <div className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-gray-600">
-                💡 提示：可以同時展開多個 Day，方便對照不同天的行程
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 px-2">
+              <p className="text-xs sm:text-sm text-zinc-400">
+                💡 可以同時展開多個 Day 對照行程
               </p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 text-xs sm:text-sm">
                 <button
                   onClick={() => {
                     const allExpanded: Record<string, boolean> = {};
@@ -131,14 +136,14 @@ export default function TripDetailPage() {
                     });
                     setExpandedDays(allExpanded);
                   }}
-                  className="text-sm text-blue-600 hover:underline"
+                  className="text-emerald-400 hover:text-emerald-300 transition-colors"
                 >
                   展開全部
                 </button>
-                <span className="text-gray-300">|</span>
+                <span className="text-zinc-700">|</span>
                 <button
                   onClick={() => setExpandedDays({})}
-                  className="text-sm text-blue-600 hover:underline"
+                  className="text-emerald-400 hover:text-emerald-300 transition-colors"
                 >
                   收合全部
                 </button>

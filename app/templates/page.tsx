@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Template } from '@/lib/types/template';
+import Link from 'next/link';
 
 export default function TemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -19,104 +20,131 @@ export default function TemplatesPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen p-8">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-gray-500">載入中...</p>
+      <main className="min-h-screen p-4 sm:p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="tour-card p-6 loading-pulse">
+            <p className="text-zinc-400">載入中...</p>
+          </div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-2">選擇旅程模板</h1>
-        <p className="text-gray-600 mb-2">從預設模板開始規劃你的滑雪旅程</p>
-        <p className="text-sm text-blue-600 font-medium mb-8">
-          ✨ 選擇後可自由增刪修改每一天，不會鎖住你的行程
-        </p>
+    <main className="min-h-screen p-4 sm:p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header with Back Button */}
+        <div className="mb-6 sm:mb-8">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-emerald-400 hover:text-emerald-300 transition-colors mb-4 text-sm sm:text-base"
+          >
+            <span>←</span>
+            <span>返回首頁</span>
+          </Link>
 
-        <div className="grid gap-6 md:grid-cols-2">
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl mb-2 sm:mb-3 text-gradient-velocity tracking-wide skew-title">
+            <span className="unskew inline-block">選擇旅程模板</span>
+          </h1>
+          <div className="h-1 w-24 sm:w-32 tour-card-stripes mb-3 sm:mb-4"></div>
+
+          <p className="text-zinc-400 text-base sm:text-lg mb-2">從預設模板開始規劃你的滑雪旅程</p>
+          <div className="tour-badge badge-emerald inline-flex">
+            <span className="tour-badge-inner">✨ 選擇後可自由增刪修改每一天，不會鎖住你的行程</span>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-2">
           {templates.map((template) => (
             <div
               key={template.template_id}
-              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+              className="tour-card p-4 sm:p-6 hover:tour-card-animate relative group"
             >
-              <h2 className="text-2xl font-bold mb-2">{template.name}</h2>
-              <p className="text-gray-600 mb-4">{template.description}</p>
+              <div className="relative z-10">
+                <h2 className="font-display text-2xl sm:text-3xl mb-2 sm:mb-3 text-gradient-velocity tracking-wide skew-title">
+                  <span className="unskew inline-block">{template.name}</span>
+                </h2>
+                <p className="text-zinc-400 text-sm sm:text-base mb-4 sm:mb-6 leading-relaxed">{template.description}</p>
 
-              {/* 日程預覽條 */}
-              <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                <p className="text-xs text-gray-500 mb-2">行程節奏</p>
-                <div className="flex gap-2 flex-wrap">
-                  {template.day_templates.map((day) => (
-                    <div
-                      key={day.day_index}
-                      className="flex flex-col items-center"
-                    >
-                      <div className="text-lg">
-                        {day.is_ski_day ? '⛷️' : day.day_index === 1 || day.day_index === template.default_days ? '✈️' : '🏙️'}
+                {/* 日程預覽條 */}
+                <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-zinc-900/50 rounded-lg border border-emerald-500/20">
+                  <p className="text-xs text-zinc-500 mb-2 sm:mb-3">行程節奏</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {template.day_templates.map((day) => (
+                      <div
+                        key={day.day_index}
+                        className="flex flex-col items-center min-w-[2rem]"
+                      >
+                        <div className="text-lg sm:text-xl">
+                          {day.is_ski_day ? '⛷️' : day.day_index === 1 || day.day_index === template.default_days ? '✈️' : '🏙️'}
+                        </div>
+                        <div className="text-xs text-zinc-600">
+                          D{day.day_index}
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-600">
-                        D{day.day_index}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-2 mb-6">
-                <div className="flex items-center text-sm text-gray-700">
-                  <span className="font-semibold w-24">地區：</span>
-                  <span>{template.region}</span>
+                <div className="space-y-2 mb-4 sm:mb-6">
+                  <div className="flex items-start sm:items-center text-xs sm:text-sm">
+                    <span className="font-bold text-emerald-400 w-20 sm:w-24 shrink-0">地區：</span>
+                    <span className="text-zinc-300">{template.region}</span>
+                  </div>
+                  <div className="flex items-start sm:items-center text-xs sm:text-sm">
+                    <span className="font-bold text-emerald-400 w-20 sm:w-24 shrink-0">總天數：</span>
+                    <span className="text-zinc-300">{template.default_days} 天</span>
+                  </div>
+                  <div className="flex items-start sm:items-center text-xs sm:text-sm">
+                    <span className="font-bold text-emerald-400 w-20 sm:w-24 shrink-0">滑雪天數：</span>
+                    <span className="text-zinc-300">{template.default_ski_days} 天</span>
+                  </div>
+                  <div className="flex items-start sm:items-center text-xs sm:text-sm">
+                    <span className="font-bold text-emerald-400 w-20 sm:w-24 shrink-0">適合：</span>
+                    <span className="text-zinc-300">{template.target_group}</span>
+                  </div>
                 </div>
-                <div className="flex items-center text-sm text-gray-700">
-                  <span className="font-semibold w-24">總天數：</span>
-                  <span>{template.default_days} 天</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-700">
-                  <span className="font-semibold w-24">滑雪天數：</span>
-                  <span>{template.default_ski_days} 天</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-700">
-                  <span className="font-semibold w-24">適合：</span>
-                  <span>{template.target_group}</span>
-                </div>
-              </div>
 
-              <button
-                onClick={() => (window.location.href = `/templates/${template.template_id}`)}
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-              >
-                查看詳情 →
-              </button>
+                <button
+                  onClick={() => (window.location.href = `/templates/${template.template_id}`)}
+                  className="btn-tour-primary w-full text-sm sm:text-base velocity-shine"
+                >
+                  查看詳情 →
+                </button>
+              </div>
+              <div className="tour-card-stripes"></div>
             </div>
           ))}
 
           {/* 從空白開始 */}
-          <div className="bg-white rounded-lg shadow-md p-6 border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors">
-            <h2 className="text-2xl font-bold mb-2">從空白開始</h2>
-            <p className="text-gray-600 mb-4">
-              已經很熟悉行程規劃？自己從頭開始打造專屬旅程
-            </p>
+          <div className="tour-card p-4 sm:p-6 border-dashed border-2 border-emerald-500/30 hover:border-emerald-500/50 transition-all relative group">
+            <div className="relative z-10">
+              <h2 className="font-display text-2xl sm:text-3xl mb-2 sm:mb-3 text-gradient-velocity tracking-wide skew-title">
+                <span className="unskew inline-block">從空白開始</span>
+              </h2>
+              <p className="text-zinc-400 text-sm sm:text-base mb-4 sm:mb-6 leading-relaxed">
+                已經很熟悉行程規劃？自己從頭開始打造專屬旅程
+              </p>
 
-            <div className="space-y-2 mb-6">
-              <div className="flex items-center text-sm text-gray-700">
-                <span className="font-semibold w-24">彈性：</span>
-                <span>完全自訂</span>
+              <div className="space-y-2 mb-4 sm:mb-6">
+                <div className="flex items-start sm:items-center text-xs sm:text-sm">
+                  <span className="font-bold text-emerald-400 w-20 sm:w-24 shrink-0">彈性：</span>
+                  <span className="text-zinc-300">完全自訂</span>
+                </div>
+                <div className="flex items-start sm:items-center text-xs sm:text-sm">
+                  <span className="font-bold text-emerald-400 w-20 sm:w-24 shrink-0">適合：</span>
+                  <span className="text-zinc-300">進階玩家、特殊需求</span>
+                </div>
               </div>
-              <div className="flex items-center text-sm text-gray-700">
-                <span className="font-semibold w-24">適合：</span>
-                <span>進階玩家、特殊需求</span>
-              </div>
+
+              <button
+                onClick={() => alert('空白旅程功能即將推出！')}
+                className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 py-3 px-4 rounded-lg font-bold transition-colors clip-corner text-sm sm:text-base"
+              >
+                建立空白旅程（即將推出）
+              </button>
             </div>
-
-            <button
-              onClick={() => alert('空白旅程功能即將推出！')}
-              className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
-            >
-              建立空白旅程（即將推出）
-            </button>
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
           </div>
         </div>
       </div>
